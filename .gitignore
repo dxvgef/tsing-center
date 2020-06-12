@@ -1,0 +1,16 @@
+.DS_Store
+.idea
+bin
+*.iml
+*.test
+go.sum
+.vscode
+.history
+*.key
+*.pem
+*.cert
+*.http
+*.bak
+*.config.local.yml
+temp_test.go
+__debug_bin
