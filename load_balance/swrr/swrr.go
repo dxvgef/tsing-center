@@ -15,7 +15,8 @@ type InstType struct{}
 
 // 节点结构
 type NodeType struct {
-	Addr            string
+	IP              string
+	Port            uint32
 	Weight          int
 	CurrentWeight   int
 	EffectiveWeight int
@@ -36,10 +37,10 @@ func Init() *InstType {
 // 	}
 // }
 
-// 设置节点
-func (self *InstType) Set(upstreamID, addr string, weight int) (err error) {
+// 设置单个节点
+func (self *InstType) Set(serviceID, ip string, port uint32, weight int) (err error) {
 	var nodes []*NodeType
-	mapValue, exist := globalNodes.Load(upstreamID)
+	mapValue, exist := globalNodes.Load(serviceID)
 	if exist {
 		var ok bool
 		if nodes, ok = mapValue.([]*NodeType); !ok {
@@ -50,11 +51,11 @@ func (self *InstType) Set(upstreamID, addr string, weight int) (err error) {
 	}
 	for k := range nodes {
 		// 如果节点已存在，则直接更新
-		if nodes[k].Addr == addr {
+		if nodes[k].IP == ip && nodes[k].Port == port {
 			if nodes[k].Weight != weight {
 				nodes[k].Weight = weight
-				globalNodes.Store(upstreamID, nodes)
-				return self.reset(upstreamID)
+				globalNodes.Store(serviceID, nodes)
+				return self.reset(serviceID)
 			}
 			return
 		}
@@ -62,26 +63,27 @@ func (self *InstType) Set(upstreamID, addr string, weight int) (err error) {
 
 	// 插入节点
 	nodes = append(nodes, &NodeType{
-		Addr:   addr,
+		IP:     ip,
+		Port:   port,
 		Weight: weight,
 	})
-	globalNodes.Store(upstreamID, nodes)
-	if err = self.reset(upstreamID); err != nil {
+	globalNodes.Store(serviceID, nodes)
+	if err = self.reset(serviceID); err != nil {
 		return
 	}
 	// 递增节点总数
-	return self.updateTotal(upstreamID, 1)
+	return self.updateTotal(serviceID, 1)
 }
 
-// 移除指定地址的节点
-func (self *InstType) Remove(upstreamID, addr string) (err error) {
-	mapValue, exist := globalNodes.Load(upstreamID)
+// 移除单个节点
+func (self *InstType) Remove(serviceID, ip string, port uint32) (err error) {
+	mapValue, exist := globalNodes.Load(serviceID)
 	if !exist {
 		return nil
 	}
-	if addr == "" {
+	if ip == "" {
 
-		globalNodes.Delete(upstreamID)
+		globalNodes.Delete(serviceID)
 	}
 	nodes, ok := mapValue.([]*NodeType)
 	if !ok {
@@ -90,22 +92,22 @@ func (self *InstType) Remove(upstreamID, addr string) (err error) {
 		return
 	}
 	for k := range nodes {
-		if nodes[k].Addr != addr {
+		if nodes[k].IP != ip && nodes[k].Port != port {
 			continue
 		}
 		newNodes := append(nodes[:k], nodes[k+1:]...)
-		globalNodes.Store(upstreamID, newNodes)
-		if err = self.reset(upstreamID); err != nil {
+		globalNodes.Store(serviceID, newNodes)
+		if err = self.reset(serviceID); err != nil {
 			return
 		}
-		return self.updateTotal(upstreamID, -1)
+		return self.updateTotal(serviceID, -1)
 	}
 	return
 }
 
-// 节点总数
-func (self *InstType) Total(upstreamID string) int {
-	mapValue, exist := globalTotal.Load(upstreamID)
+// 获取节点总数
+func (self *InstType) Total(serviceID string) int {
+	mapValue, exist := globalTotal.Load(serviceID)
 	if !exist {
 		return 0
 	}
@@ -116,18 +118,19 @@ func (self *InstType) Total(upstreamID string) int {
 	return total
 }
 
-// 选举出一个命中的节点
-func (self *InstType) Next(upstreamID string) string {
-	nodes := self.getNodes(upstreamID)
+// 选取节点
+func (self *InstType) Next(serviceID string) (string, uint32) {
+	nodes := self.getNodes(serviceID)
 	if nodes == nil {
-		return ""
+		return "", 0
 	}
 	nodeTotal := len(nodes)
 	if nodeTotal == 1 {
-		return nodes[0].Addr
+		return nodes[0].IP, nodes[0].Port
 	}
 	var (
-		addr   string
+		ip     string
+		port   uint32
 		target *NodeType
 	)
 	totalWeight := 0
@@ -139,22 +142,23 @@ func (self *InstType) Next(upstreamID string) string {
 		}
 		if target == nil || nodes[i].CurrentWeight > target.CurrentWeight {
 			target = nodes[i]
-			addr = nodes[i].Addr
+			ip = nodes[i].IP
+			port = nodes[i].Port
 		}
 	}
 
-	globalNodes.Store(upstreamID, nodes)
+	globalNodes.Store(serviceID, nodes)
 
 	if target == nil {
-		return ""
+		return "", 0
 	}
 	target.CurrentWeight -= totalWeight
-	return addr
+	return ip, port
 }
 
 // 重置所有节点的状态
-func (self *InstType) reset(upstreamID string) (err error) {
-	mapValue, exist := globalNodes.Load(upstreamID)
+func (self *InstType) reset(serviceID string) (err error) {
+	mapValue, exist := globalNodes.Load(serviceID)
 	if !exist {
 		return nil
 	}
@@ -171,11 +175,11 @@ func (self *InstType) reset(upstreamID string) (err error) {
 	return nil
 }
 
-// 更新节点统计总数
-func (self *InstType) updateTotal(upstreamID string, count int) (err error) {
-	mapValue, exist := globalTotal.Load(upstreamID)
+// 更新节点总数
+func (self *InstType) updateTotal(serviceID string, count int) (err error) {
+	mapValue, exist := globalTotal.Load(serviceID)
 	if !exist {
-		globalTotal.Store(upstreamID, 0)
+		globalTotal.Store(serviceID, 0)
 		return nil
 	}
 
@@ -186,23 +190,23 @@ func (self *InstType) updateTotal(upstreamID string, count int) (err error) {
 		return err
 	}
 	total += count
-	globalTotal.Store(upstreamID, total)
+	globalTotal.Store(serviceID, total)
 	return nil
 }
 
 // 判断节点是否存在
-func (self *InstType) nodeExist(upstreamID, addr string) (exist bool) {
-	if _, exist = globalNodes.Load(upstreamID); !exist {
+func (self *InstType) nodeExist(serviceID, ip string, port uint32) (exist bool) {
+	if _, exist = globalNodes.Load(serviceID); !exist {
 		return
 	}
 	globalNodes.Range(func(key, value interface{}) bool {
-		if key.(string) == upstreamID {
+		if key.(string) == serviceID {
 			nodes, ok := value.([]*NodeType)
 			if !ok {
 				return true
 			}
 			for k := range nodes {
-				if nodes[k].Addr == addr {
+				if nodes[k].IP == ip && nodes[k].Port == port {
 					exist = true
 					return false
 				}
@@ -213,9 +217,9 @@ func (self *InstType) nodeExist(upstreamID, addr string) (exist bool) {
 	return
 }
 
-// 获得节点
-func (self *InstType) getNodes(upstreamID string) []*NodeType {
-	mapValue, exist := globalNodes.Load(upstreamID)
+// 获得所有节点
+func (self *InstType) getNodes(serviceID string) []*NodeType {
+	mapValue, exist := globalNodes.Load(serviceID)
 	if !exist {
 		return nil
 	}
