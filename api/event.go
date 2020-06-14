@@ -7,7 +7,7 @@ import (
 	"github.com/dxvgef/tsing"
 	"github.com/rs/zerolog/log"
 
-	"github.com/dxvgef/tsing-gateway/global"
+	"github.com/dxvgef/tsing-center/global"
 )
 
 // 事件处理器

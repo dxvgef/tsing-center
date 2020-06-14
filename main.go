@@ -9,15 +9,14 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/bwmarrin/snowflake"
-	"github.com/rs/zerolog/log"
-	"golang.org/x/net/http2"
-
 	"github.com/dxvgef/tsing-center/api"
 	"github.com/dxvgef/tsing-center/global"
 	"github.com/dxvgef/tsing-center/storage"
 
+	"github.com/bwmarrin/snowflake"
 	"github.com/dxvgef/tsing"
+	"github.com/rs/zerolog/log"
+	"golang.org/x/net/http2"
 )
 
 func main() {

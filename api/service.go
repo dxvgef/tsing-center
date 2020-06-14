@@ -1,11 +1,11 @@
 package api
 
 import (
+	"github.com/dxvgef/tsing-center/global"
+
 	"github.com/dxvgef/filter"
 	"github.com/dxvgef/tsing"
 	"github.com/rs/zerolog/log"
-
-	"github.com/dxvgef/tsing-center/global"
 )
 
 type Service struct{}

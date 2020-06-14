@@ -34,7 +34,7 @@ type StorageType interface {
 	SaveAll() error // 将本地所有数据保存到存储器
 
 	LoadAllService() error             // 从存储器加载所有服务到本地
-	LoadService([]byte) error          // 从存储器加载单个服务数据
+	LoadService(string, []byte) error  // 从存储器加载单个服务数据
 	SaveAllService() error             // 将本地所有服务保存到存储器
 	SaveService(string, string) error  // 将本地单个服务保存到存储器
 	DeleteLocalService(string) error   // 删除本地单个服务

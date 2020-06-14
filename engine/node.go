@@ -27,13 +27,13 @@ func SetNode(serviceID string, node global.NodeType) error {
 }
 
 // 删除本地数据中的服务
-func DelService(serviceID string) error {
+func DelNode(serviceID string) error {
 	global.Services.Delete(serviceID)
 	return nil
 }
 
 // 从本地数据中匹配服务
-func matchService(serviceID string) (global.ServiceType, bool) {
+func matchNode(serviceID string) (global.ServiceType, bool) {
 	if serviceID == "" {
 		return global.ServiceType{}, false
 	}
