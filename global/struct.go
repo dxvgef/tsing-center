@@ -40,5 +40,12 @@ type StorageType interface {
 	DeleteLocalService(string) error   // 删除本地单个服务
 	DeleteStorageService(string) error // 删除存储器中单个服务
 
+	LoadAllNode() error                             // 从存储器加载所有节点到本地
+	LoadNode(string, []byte) error                  // 从存储器加载单个节点数据
+	SaveAllNode() error                             // 将本地所有节点保存到存储器
+	SaveNode(string, string, uint16, int) error     // 将本地单个节点保存到存储器
+	DeleteLocalNode(string) error                   // 删除本地单个节点
+	DeleteStorageNode(string, string, uint16) error // 删除存储器中单个节点
+
 	Watch() error // 监听存储器的数据变更
 }

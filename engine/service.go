@@ -25,7 +25,7 @@ func DelService(serviceID string) error {
 }
 
 // 从本地数据中匹配服务
-func matchService(serviceID string) (global.ServiceType, bool) {
+func MatchService(serviceID string) (global.ServiceType, bool) {
 	if serviceID == "" {
 		return global.ServiceType{}, false
 	}

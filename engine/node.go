@@ -18,7 +18,7 @@ func SetNode(serviceID string, ip string, port uint16, weight int) (err error) {
 	if port == 0 {
 		return errors.New("port参数不能为0")
 	}
-	service, serviceExist := matchService(serviceID)
+	service, serviceExist := MatchService(serviceID)
 	if !serviceExist {
 		return errors.New("服务ID不存在")
 	}
@@ -51,6 +51,25 @@ func DelNode(serviceID string, ip string, port uint16) error {
 	}
 	global.Nodes.Store(serviceID, lb)
 	return nil
+}
+
+// 判断节点是否存在
+func NodeExist(serviceID, ip string, port uint16) bool {
+	mapValue, exist := global.Nodes.Load(serviceID)
+	if !exist {
+		return false
+	}
+	lb, ok := mapValue.(global.LoadBalance)
+	if !ok {
+		return false
+	}
+	nodes := lb.Nodes()
+	for k := range nodes {
+		if nodes[k].IP == ip && nodes[k].Port == port {
+			return true
+		}
+	}
+	return false
 }
 
 // 从本地数据中匹配节点
