@@ -41,16 +41,6 @@ func FormatTime(str string) string {
 	return str
 }
 
-// InStr 检查string值在一个string slice中是否存在
-func InStr(s []string, str string) bool {
-	for k := range s {
-		if str == s[k] {
-			return true
-		}
-	}
-	return false
-}
-
 // 计算sync.Map的长度
 func SyncMapLen(m *sync.Map) (count int) {
 	if m == nil {
@@ -61,15 +51,4 @@ func SyncMapLen(m *sync.Map) (count int) {
 		return true
 	})
 	return
-}
-
-// 清空sync.Map
-func SyncMapClean(m *sync.Map) {
-	if m == nil {
-		return
-	}
-	m.Range(func(key, _ interface{}) bool {
-		m.Delete(key)
-		return true
-	})
 }
