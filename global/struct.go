@@ -8,10 +8,10 @@ type ModuleConfig struct {
 
 // 负载均衡接口
 type LoadBalance interface {
-	Set(string, string, int) error
-	Remove(string, string) error
-	Next(string) (string, int)
-	Total(string) int
+	Set(string, uint16, int)
+	Remove(string, uint16)
+	Next() (string, uint16)
+	Total() int
 }
 
 // 服务
@@ -24,7 +24,7 @@ type ServiceType struct {
 type NodeType struct {
 	ServiceID string `json:"service_id"` // 服务ID
 	IP        string `json:"ip"`         // 节点IP
-	Port      int    `json:"port"`       // 节点端口
+	Port      uint16 `json:"port"`       // 节点端口
 	Weight    int    `json:"weight"`     // 节点权重
 }
 

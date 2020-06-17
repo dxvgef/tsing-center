@@ -114,7 +114,7 @@ func easyjson9f2eff5fDecodeGithubComDxvgefTsingCenterGlobal1(in *jlexer.Lexer, o
 		case "ip":
 			out.IP = string(in.String())
 		case "port":
-			out.Port = int(in.Int())
+			out.Port = uint16(in.Uint16())
 		case "weight":
 			out.Weight = int(in.Int())
 		default:
@@ -144,7 +144,7 @@ func easyjson9f2eff5fEncodeGithubComDxvgefTsingCenterGlobal1(out *jwriter.Writer
 	{
 		const prefix string = ",\"port\":"
 		out.RawString(prefix)
-		out.Int(int(in.Port))
+		out.Uint16(uint16(in.Port))
 	}
 	{
 		const prefix string = ",\"weight\":"
