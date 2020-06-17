@@ -19,7 +19,7 @@ func (self *Service) Add(ctx *tsing.Context) error {
 		}
 	)
 	if err = filter.MSet(
-		filter.El(&req.id, filter.FromString(ctx.Post("id"), "id").Required()),
+		filter.El(&req.id, filter.FromString(ctx.Post("service_id"), "service_id").Required()),
 		filter.El(&req.loadBalance, filter.FromString(ctx.Post("load_balance"), "load_balance")),
 	); err != nil {
 		resp["error"] = err.Error()
@@ -51,7 +51,7 @@ func (self *Service) Put(ctx *tsing.Context) error {
 		}
 	)
 	if err = filter.MSet(
-		filter.El(&req.id, filter.FromString(ctx.PathParams.Value("id"), "id").Required().Base64RawURLDecode()),
+		filter.El(&req.id, filter.FromString(ctx.PathParams.Value("serviceID"), "serviceID").Required().Base64RawURLDecode()),
 		filter.El(&req.loadBalance, filter.FromString(ctx.Post("load_balance"), "load_balance")),
 	); err != nil {
 		resp["error"] = err.Error()
@@ -76,13 +76,13 @@ func (self *Service) Delete(ctx *tsing.Context) error {
 		resp = make(map[string]string)
 		id   string
 	)
-	if id, err = global.DecodeKey(ctx.PathParams.Value("id")); err != nil {
+	if id, err = global.DecodeKey(ctx.PathParams.Value("serviceID")); err != nil {
 		return Status(ctx, 404)
 	}
 	if _, exist := global.Services.Load(id); !exist {
 		return Status(ctx, 404)
 	}
-	err = global.Storage.DeleteStorageService(ctx.PathParams.Value("id"))
+	err = global.Storage.DeleteStorageService(ctx.PathParams.Value("serviceID"))
 	if err != nil {
 		resp["error"] = err.Error()
 		return JSON(ctx, 500, &resp)
