@@ -53,7 +53,7 @@ func (self *Etcd) SaveService(serviceID, loadBalance string) (err error) {
 	var key strings.Builder
 	key.WriteString(self.KeyPrefix)
 	key.WriteString("/services/")
-	key.WriteString(serviceID)
+	key.WriteString(global.EncodeKey(serviceID))
 
 	ctx, ctxCancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer ctxCancel()

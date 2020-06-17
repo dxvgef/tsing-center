@@ -7,8 +7,15 @@ func SetRouter(engine *tsing.Engine) {
 	// 检查secret
 	router := engine.Group("", checkSecretFromHeader)
 
-	var proxyHandler Engine
-	router.GET("/engine/", proxyHandler.OutputJSON)
-	router.POST("/engine/", proxyHandler.LoadAll)
-	router.PUT("/engine/", proxyHandler.SaveAll)
+	// 数据管理
+	var dataHandler Data
+	router.GET("/data/", dataHandler.OutputJSON)
+	router.POST("/data/", dataHandler.LoadAll)
+	router.PUT("/data/", dataHandler.SaveAll)
+
+	// 服务管理
+	var serviceHandler Service
+	router.POST("/service/", serviceHandler.Add)
+	router.PUT("/service/:id", serviceHandler.Put)
+	router.DELETE("/service/:id", serviceHandler.Delete)
 }

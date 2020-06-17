@@ -5,7 +5,6 @@ import (
 
 	"github.com/dxvgef/filter"
 	"github.com/dxvgef/tsing"
-	"github.com/rs/zerolog/log"
 )
 
 type Service struct{}
@@ -18,8 +17,6 @@ func (self *Service) Add(ctx *tsing.Context) error {
 			id          string
 			loadBalance string
 		}
-		service      global.ServiceType
-		serviceBytes []byte
 	)
 	if err = filter.MSet(
 		filter.El(&req.id, filter.FromString(ctx.Post("id"), "id").Required()),
@@ -33,19 +30,11 @@ func (self *Service) Add(ctx *tsing.Context) error {
 		return JSON(ctx, 400, &resp)
 	}
 	if req.loadBalance == "" {
-		resp["error"] = "load_balance参数不能同时为空"
+		resp["error"] = "load_balance参数不能为空"
 		return JSON(ctx, 400, &resp)
 	}
 
-	service.ID = req.id
-
-	if serviceBytes, err = service.MarshalJSON(); err != nil {
-		log.Err(err).Caller().Msg("将服务信息序列化成JSON字符串失败")
-		resp["error"] = err.Error()
-		return JSON(ctx, 500, &resp)
-	}
-
-	if err = global.Storage.SaveService(req.id, global.BytesToStr(serviceBytes)); err != nil {
+	if err = global.Storage.SaveService(req.id, req.loadBalance); err != nil {
 		resp["error"] = err.Error()
 		return JSON(ctx, 500, &resp)
 	}
@@ -60,8 +49,6 @@ func (self *Service) Put(ctx *tsing.Context) error {
 			id          string
 			loadBalance string
 		}
-		service      global.ServiceType
-		serviceBytes []byte
 	)
 	if err = filter.MSet(
 		filter.El(&req.id, filter.FromString(ctx.PathParams.Value("id"), "id").Required().Base64RawURLDecode()),
@@ -70,24 +57,16 @@ func (self *Service) Put(ctx *tsing.Context) error {
 		resp["error"] = err.Error()
 		return JSON(ctx, 400, &resp)
 	}
-
 	if req.loadBalance == "" {
-		resp["error"] = "load_balance参数不能同时为空"
+		resp["error"] = "load_balance参数不能为空"
 		return JSON(ctx, 400, &resp)
 	}
 
-	service.ID = req.id
-
-	if serviceBytes, err = service.MarshalJSON(); err != nil {
-		log.Err(err).Caller().Msg("将服务信息序列化成JSON字符串失败")
+	if err = global.Storage.SaveService(req.id, req.loadBalance); err != nil {
 		resp["error"] = err.Error()
 		return JSON(ctx, 500, &resp)
 	}
 
-	if err = global.Storage.SaveService(req.id, global.BytesToStr(serviceBytes)); err != nil {
-		resp["error"] = err.Error()
-		return JSON(ctx, 500, &resp)
-	}
 	return Status(ctx, 204)
 }
 

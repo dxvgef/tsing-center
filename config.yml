@@ -18,7 +18,7 @@ storage:
     name: "etcd"
     # 存储器配置json字符串
     config: '{
-        "endpoints": ["http://127.0.0.1:2379"],
+        "endpoints": ["http://192.168.50.212:2379"],
         "key_prefix": "/tsing-center"
     }
     '
@@ -45,7 +45,7 @@ api:
     # HTTPS配置
     https:
         # 端口号，如果为0则禁用HTTPS
-        port: 20443
+        port: 0
         # 服务端证书文件
         certFile: "./server.cert"
         # 服务端私钥文件
