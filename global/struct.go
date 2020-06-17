@@ -8,6 +8,7 @@ type ModuleConfig struct {
 
 // 负载均衡接口
 type LoadBalance interface {
+	Name() string            // 算法名称
 	Set(string, uint16, int) // 设置节点
 	Remove(string, uint16)   // 移除节点
 	Next() (string, uint16)  // 选取节点

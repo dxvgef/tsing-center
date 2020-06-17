@@ -39,6 +39,10 @@ func (self *Etcd) watchLoadData(key, value []byte) error {
 	if strings.HasPrefix(keyStr, self.KeyPrefix+"/services/") {
 		return self.LoadService(keyStr, value)
 	}
+	// 加载节点
+	if strings.HasPrefix(keyStr, self.KeyPrefix+"/nodes/") {
+		return self.LoadNode(keyStr, value)
+	}
 	return nil
 }
 
@@ -47,6 +51,9 @@ func (self *Etcd) watchDeleteData(key []byte) error {
 	keyStr := global.BytesToStr(key)
 	if strings.HasPrefix(keyStr, self.KeyPrefix+"/services/") {
 		return self.DeleteLocalService(keyStr)
+	}
+	if strings.HasPrefix(keyStr, self.KeyPrefix+"/nodes/") {
+		return self.DeleteLocalNode(keyStr)
 	}
 	return nil
 }

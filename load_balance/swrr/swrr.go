@@ -30,6 +30,11 @@ func New() *Instance {
 	return &Instance{}
 }
 
+// 获得算法名称
+func (self *Instance) Name() string {
+	return "SWRR"
+}
+
 // 设置节点
 func (self *Instance) Set(ip string, port uint16, weight int) {
 	for k := range self.nodes {

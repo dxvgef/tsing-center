@@ -45,7 +45,7 @@ func (self *Etcd) LoadAllNode() error {
 		return err
 	}
 	for k := range resp.Kvs {
-		err = self.LoadService(global.BytesToStr(resp.Kvs[k].Key), resp.Kvs[k].Value)
+		err = self.LoadNode(global.BytesToStr(resp.Kvs[k].Key), resp.Kvs[k].Value)
 		if err != nil {
 			return err
 		}
@@ -184,12 +184,14 @@ func (self *Etcd) ParseNode(key, prefix string) (serviceID, ip string, port uint
 	pos := strings.Index(nodePart, ":")
 	if pos == -1 {
 		err = errors.New("解析节点信息失败")
+		log.Error().Caller().Msg("解析节点信息失败")
 		return
 	}
 	ip = nodePart[0:pos]
-	p, er := strconv.Atoi(nodePart[pos:])
+	p, er := strconv.Atoi(nodePart[pos+1:])
 	if er != nil {
 		err = er
+		log.Err(err).Caller().Msg("解析节点信息失败")
 		return
 	}
 	port = uint16(p)
@@ -198,6 +200,7 @@ func (self *Etcd) ParseNode(key, prefix string) (serviceID, ip string, port uint
 	pos = strings.Index(key, "/")
 	if pos == -1 {
 		err = errors.New("解析服务ID信息失败")
+		log.Error().Caller().Msg("解析服务ID信息失败")
 		return
 	}
 

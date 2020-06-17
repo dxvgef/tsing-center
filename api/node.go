@@ -5,6 +5,8 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/rs/zerolog/log"
+
 	"github.com/dxvgef/tsing-center/engine"
 	"github.com/dxvgef/tsing-center/global"
 
@@ -73,10 +75,11 @@ func (self *Node) Put(ctx *tsing.Context) error {
 	}
 	pos := strings.Index(req.node, ":")
 	if pos == -1 {
+		log.Debug().Int("pos", pos).Msg("解析node失败")
 		return Status(ctx, 404)
 	}
 	req.ip = req.node[0:pos]
-	port, err = strconv.ParseUint(req.node[pos:], 10, 16)
+	port, err = strconv.ParseUint(req.node[pos+1:], 10, 16)
 	if err != nil {
 		return Status(ctx, 404)
 	}

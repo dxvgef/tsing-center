@@ -22,7 +22,7 @@ func SetNode(serviceID string, ip string, port uint16, weight int) (err error) {
 	if !serviceExist {
 		return errors.New("服务ID不存在")
 	}
-	lb, lbExist := matchNode(serviceID)
+	lb, lbExist := MatchNode(serviceID)
 	if !lbExist {
 		lb, err = load_balance.Build(service.LoadBalance)
 		if err != nil {
@@ -73,7 +73,7 @@ func NodeExist(serviceID, ip string, port uint16) bool {
 }
 
 // 从本地数据中匹配节点
-func matchNode(serviceID string) (global.LoadBalance, bool) {
+func MatchNode(serviceID string) (global.LoadBalance, bool) {
 	mapValue, exist := global.Nodes.Load(serviceID)
 	if !exist {
 		return nil, false

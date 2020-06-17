@@ -15,13 +15,14 @@ func SetRouter(engine *tsing.Engine) {
 
 	// 服务管理
 	var serviceHandler Service
-	router.POST("/service/", serviceHandler.Add)
-	router.PUT("/service/:serviceID", serviceHandler.Put)
-	router.DELETE("/service/:serviceID", serviceHandler.Delete)
+	router.POST("/services/", serviceHandler.Add)
+	router.PUT("/services/:serviceID", serviceHandler.Put)
+	router.GET("/services/:serviceID/next", serviceHandler.Next)
+	router.DELETE("/services/:serviceID", serviceHandler.Delete)
 
 	// 节点管理
 	var nodeHandler Node
-	router.POST("/node/", nodeHandler.Add)
-	router.PUT("/node/:serviceID/:node", nodeHandler.Put)
-	router.DELETE("/node/:serviceID/:node", nodeHandler.Delete)
+	router.POST("/nodes/", nodeHandler.Add)
+	router.PUT("/nodes/:serviceID/:node", nodeHandler.Put)
+	router.DELETE("/nodes/:serviceID/:node", nodeHandler.Delete)
 }

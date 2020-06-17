@@ -26,6 +26,9 @@ func (self *Data) OutputJSON(ctx *tsing.Context) error {
 		})
 		return true
 	})
+	if data.Nodes == nil {
+		data.Nodes = make(map[string][]global.NodeType, global.SyncMapLen(&global.Nodes))
+	}
 	global.Nodes.Range(func(key, value interface{}) bool {
 		serviceID := key.(string)
 		lb, ok := value.(global.LoadBalance)
