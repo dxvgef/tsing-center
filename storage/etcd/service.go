@@ -2,7 +2,6 @@ package etcd
 
 import (
 	"context"
-	"encoding/json"
 	"errors"
 	"path"
 	"strings"
@@ -66,25 +65,20 @@ func (self *Etcd) SaveService(serviceID, loadBalance string) (err error) {
 // 将本地中所有服务数据保存到存储器
 func (self *Etcd) SaveAllService() error {
 	var (
-		err       error
-		key       strings.Builder
-		services  = make(map[string]string, global.SyncMapLen(&global.Services))
-		dataBytes []byte
+		err      error
+		key      strings.Builder
+		services = make(map[string]string, global.SyncMapLen(&global.Services))
 	)
 
 	// 将配置保存到临时变量中
 	global.Services.Range(func(k, v interface{}) bool {
-		h, ok := v.(global.ServiceType)
+		service, ok := v.(global.ServiceType)
 		if !ok {
 			err = errors.New("服务" + k.(string) + "的配置异常")
 			log.Err(err).Caller().Msg("类型断言失败")
 			return false
 		}
-		if dataBytes, err = json.Marshal(&h); err != nil {
-			log.Err(err).Caller().Msg("JSON序列化失败")
-			return false
-		}
-		services[k.(string)] = global.BytesToStr(dataBytes)
+		services[service.ID] = service.LoadBalance
 		return true
 	})
 	if err != nil {
@@ -98,13 +92,12 @@ func (self *Etcd) SaveAllService() error {
 	defer ctxCancel()
 	_, err = self.client.Delete(ctx, key.String(), clientv3.WithPrefix())
 	if err != nil {
-		log.Err(err).Caller().Msg("清空存储器中的服务数据失败")
+		log.Err(err).Caller().Msg("清空存储器中的数据失败")
 		return err
 	}
 
 	// 将内存中的数据写入到存储器中
 	for serviceID, loadBalance := range services {
-		serviceID = global.EncodeKey(serviceID)
 		if err = self.SaveService(serviceID, loadBalance); err != nil {
 			return err
 		}
