@@ -8,7 +8,8 @@ import (
 )
 
 type Data struct {
-	Services []global.ServiceType `json:"services,omitempty"`
+	Services []global.ServiceType         `json:"services,omitempty"`
+	Nodes    map[string][]global.NodeType `json:"nodes,omitempty"`
 }
 
 func (self *Data) OutputJSON(ctx *tsing.Context) error {
@@ -23,6 +24,16 @@ func (self *Data) OutputJSON(ctx *tsing.Context) error {
 			ID:          v.ID,
 			LoadBalance: v.LoadBalance,
 		})
+		return true
+	})
+	global.Nodes.Range(func(key, value interface{}) bool {
+		serviceID := key.(string)
+		lb, ok := value.(global.LoadBalance)
+		if !ok {
+			log.Error().Caller().Msg("类型断言失败")
+			return false
+		}
+		data.Nodes[serviceID] = lb.Nodes()
 		return true
 	})
 	bs, err := data.MarshalJSON()

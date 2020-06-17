@@ -60,6 +60,47 @@ func easyjson794297d0DecodeGithubComDxvgefTsingCenterApi(in *jlexer.Lexer, out *
 				}
 				in.Delim(']')
 			}
+		case "nodes":
+			if in.IsNull() {
+				in.Skip()
+			} else {
+				in.Delim('{')
+				if !in.IsDelim('}') {
+					out.Nodes = make(map[string][]global.NodeType)
+				} else {
+					out.Nodes = nil
+				}
+				for !in.IsDelim('}') {
+					key := string(in.String())
+					in.WantColon()
+					var v2 []global.NodeType
+					if in.IsNull() {
+						in.Skip()
+						v2 = nil
+					} else {
+						in.Delim('[')
+						if v2 == nil {
+							if !in.IsDelim(']') {
+								v2 = make([]global.NodeType, 0, 2)
+							} else {
+								v2 = []global.NodeType{}
+							}
+						} else {
+							v2 = (v2)[:0]
+						}
+						for !in.IsDelim(']') {
+							var v3 global.NodeType
+							(v3).UnmarshalEasyJSON(in)
+							v2 = append(v2, v3)
+							in.WantComma()
+						}
+						in.Delim(']')
+					}
+					(out.Nodes)[key] = v2
+					in.WantComma()
+				}
+				in.Delim('}')
+			}
 		default:
 			in.SkipRecursive()
 		}
@@ -80,13 +121,48 @@ func easyjson794297d0EncodeGithubComDxvgefTsingCenterApi(out *jwriter.Writer, in
 		out.RawString(prefix[1:])
 		{
 			out.RawByte('[')
-			for v2, v3 := range in.Services {
-				if v2 > 0 {
+			for v4, v5 := range in.Services {
+				if v4 > 0 {
 					out.RawByte(',')
 				}
-				(v3).MarshalEasyJSON(out)
+				(v5).MarshalEasyJSON(out)
 			}
 			out.RawByte(']')
+		}
+	}
+	if len(in.Nodes) != 0 {
+		const prefix string = ",\"nodes\":"
+		if first {
+			first = false
+			out.RawString(prefix[1:])
+		} else {
+			out.RawString(prefix)
+		}
+		{
+			out.RawByte('{')
+			v6First := true
+			for v6Name, v6Value := range in.Nodes {
+				if v6First {
+					v6First = false
+				} else {
+					out.RawByte(',')
+				}
+				out.String(string(v6Name))
+				out.RawByte(':')
+				if v6Value == nil && (out.Flags&jwriter.NilSliceAsEmpty) == 0 {
+					out.RawString("null")
+				} else {
+					out.RawByte('[')
+					for v7, v8 := range v6Value {
+						if v7 > 0 {
+							out.RawByte(',')
+						}
+						(v8).MarshalEasyJSON(out)
+					}
+					out.RawByte(']')
+				}
+			}
+			out.RawByte('}')
 		}
 	}
 	out.RawByte('}')

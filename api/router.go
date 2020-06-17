@@ -20,7 +20,7 @@ func SetRouter(engine *tsing.Engine) {
 	router.DELETE("/service/:serviceID", serviceHandler.Delete)
 
 	// 节点管理
-	var nodeHandler Service
+	var nodeHandler Node
 	router.POST("/node/", nodeHandler.Add)
 	router.PUT("/node/:serviceID/:node", nodeHandler.Put)
 	router.DELETE("/node/:serviceID/:node", nodeHandler.Delete)
