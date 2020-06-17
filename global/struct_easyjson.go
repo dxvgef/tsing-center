@@ -59,7 +59,7 @@ func easyjson9f2eff5fEncodeGithubComDxvgefTsingCenterGlobal(out *jwriter.Writer,
 		out.RawString(prefix[1:])
 		out.String(string(in.ID))
 	}
-	if in.LoadBalance != "" {
+	{
 		const prefix string = ",\"load_balance\":"
 		out.RawString(prefix)
 		out.String(string(in.LoadBalance))
@@ -109,8 +109,6 @@ func easyjson9f2eff5fDecodeGithubComDxvgefTsingCenterGlobal1(in *jlexer.Lexer, o
 			continue
 		}
 		switch key {
-		case "service_id":
-			out.ServiceID = string(in.String())
 		case "ip":
 			out.IP = string(in.String())
 		case "port":
@@ -132,13 +130,8 @@ func easyjson9f2eff5fEncodeGithubComDxvgefTsingCenterGlobal1(out *jwriter.Writer
 	first := true
 	_ = first
 	{
-		const prefix string = ",\"service_id\":"
-		out.RawString(prefix[1:])
-		out.String(string(in.ServiceID))
-	}
-	{
 		const prefix string = ",\"ip\":"
-		out.RawString(prefix)
+		out.RawString(prefix[1:])
 		out.String(string(in.IP))
 	}
 	{

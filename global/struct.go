@@ -2,30 +2,30 @@ package global
 
 // 用于构建上游、中间件、存储器模块时的参数配置
 type ModuleConfig struct {
-	Name   string `json:"name"`
-	Config string `json:"config"`
+	Name   string `json:"name"`   // 模块名称
+	Config string `json:"config"` // 配置(json字符串)
 }
 
 // 负载均衡接口
 type LoadBalance interface {
-	Set(string, uint16, int)
-	Remove(string, uint16)
-	Next() (string, uint16)
-	Total() int
+	Set(string, uint16, int) // 设置节点
+	Remove(string, uint16)   // 移除节点
+	Next() (string, uint16)  // 选取节点
+	Total() int              // 节点总数
+	Nodes() []NodeType       // 节点列表
 }
 
 // 服务
 type ServiceType struct {
-	ID          string `json:"id"`                     // 服务ID
-	LoadBalance string `json:"load_balance,omitempty"` // 负载均衡算法名称
+	ID          string `json:"id"`           // 服务ID
+	LoadBalance string `json:"load_balance"` // 负载均衡算法名称
 }
 
 // 节点
 type NodeType struct {
-	ServiceID string `json:"service_id"` // 服务ID
-	IP        string `json:"ip"`         // 节点IP
-	Port      uint16 `json:"port"`       // 节点端口
-	Weight    int    `json:"weight"`     // 节点权重
+	IP     string `json:"ip"`     // 节点IP
+	Port   uint16 `json:"port"`   // 节点端口
+	Weight int    `json:"weight"` // 节点权重
 }
 
 // 存储器

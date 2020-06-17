@@ -1,5 +1,9 @@
 package swrr
 
+import (
+	"github.com/dxvgef/tsing-center/global"
+)
+
 // 平滑加权轮循(与nginx类似)
 type Instance struct {
 	nodes []NodeType
@@ -66,6 +70,21 @@ func (self *Instance) Remove(ip string, port uint16) {
 // 获取节点总数
 func (self *Instance) Total() int {
 	return self.total
+}
+
+// 获取节点列表
+func (self *Instance) Nodes() []global.NodeType {
+	l := len(self.nodes)
+	if l == 0 {
+		return []global.NodeType{}
+	}
+	nodes := make([]global.NodeType, l)
+	for k := range self.nodes {
+		nodes[k].IP = self.nodes[k].IP
+		nodes[k].Port = self.nodes[k].Port
+		nodes[k].Weight = self.nodes[k].Weight
+	}
+	return nodes
 }
 
 // 选取节点

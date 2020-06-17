@@ -1,5 +1,9 @@
 package wrr
 
+import (
+	"github.com/dxvgef/tsing-center/global"
+)
+
 // 加权轮循(与LVS类似)
 type Instance struct {
 	nodes         []NodeType // 节点列表
@@ -92,6 +96,21 @@ func (self *Instance) Next() (string, uint16) {
 			return self.nodes[last].IP, self.nodes[last].Port
 		}
 	}
+}
+
+// 获取节点列表
+func (self *Instance) Nodes() []global.NodeType {
+	l := len(self.nodes)
+	if l == 0 {
+		return []global.NodeType{}
+	}
+	nodes := make([]global.NodeType, l)
+	for k := range self.nodes {
+		nodes[k].IP = self.nodes[k].IP
+		nodes[k].Port = self.nodes[k].Port
+		nodes[k].Weight = self.nodes[k].Weight
+	}
+	return nodes
 }
 
 // 计算最大权重值
