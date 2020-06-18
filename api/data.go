@@ -8,37 +8,30 @@ import (
 )
 
 type Data struct {
-	Services []global.ServiceType         `json:"services,omitempty"`
-	Nodes    map[string][]global.NodeType `json:"nodes,omitempty"`
+	Services []global.ServiceConfig   `json:"services,omitempty"`
+	Nodes    map[string][]global.Node `json:"nodes,omitempty"`
 }
 
 func (self *Data) OutputJSON(ctx *tsing.Context) error {
 	var data Data
 	global.Services.Range(func(_, value interface{}) bool {
-		v, ok := value.(global.ServiceType)
+		v, ok := value.(global.Cluster)
 		if !ok {
 			log.Error().Caller().Msg("类型断言失败")
 			return false
 		}
-		data.Services = append(data.Services, global.ServiceType{
-			ID:          v.ID,
-			LoadBalance: v.LoadBalance,
-		})
-		return true
-	})
-	if data.Nodes == nil {
-		data.Nodes = make(map[string][]global.NodeType, global.SyncMapLen(&global.Nodes))
-	}
-	global.Nodes.Range(func(key, value interface{}) bool {
-		serviceID := key.(string)
-		lb, ok := value.(global.LoadBalance)
-		if !ok {
-			log.Error().Caller().Msg("类型断言失败")
-			return false
+		config := v.Config()
+		data.Services = append(data.Services, config)
+		if data.Nodes == nil {
+			data.Nodes = map[string][]global.Node{}
 		}
-		data.Nodes[serviceID] = lb.Nodes()
+		nodes := v.Nodes()
+		for k := range nodes {
+			data.Nodes[config.ServiceID] = append(data.Nodes[config.ServiceID], nodes[k])
+		}
 		return true
 	})
+
 	bs, err := data.MarshalJSON()
 	if err != nil {
 		ctx.ResponseWriter.WriteHeader(500)

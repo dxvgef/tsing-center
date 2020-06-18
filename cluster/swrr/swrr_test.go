@@ -1,14 +1,15 @@
-package wrr
+package swrr
 
 import (
 	"log"
 	"strconv"
 	"testing"
+	"time"
 )
 
 func TestNext(t *testing.T) {
 	var (
-		obj    Instance
+		obj    Cluster
 		ip     string
 		port   uint16
 		weight int
@@ -23,7 +24,7 @@ func TestNext(t *testing.T) {
 			port = 80
 			weight = 1
 		}
-		obj.Set(ip, port, weight)
+		obj.Set(ip, port, weight, time.Now().Add(10*time.Minute).Unix())
 		log.Println(ip, port, weight)
 	}
 

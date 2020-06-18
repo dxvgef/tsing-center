@@ -2,82 +2,77 @@ package engine
 
 import (
 	"errors"
+	"sync/atomic"
 
 	"github.com/rs/zerolog/log"
 
+	"github.com/dxvgef/tsing-center/cluster"
 	"github.com/dxvgef/tsing-center/global"
-	"github.com/dxvgef/tsing-center/load_balance"
 )
 
 // 设置本地数据中的服务
-func SetService(service global.ServiceType) (err error) {
-	if service.ID == "" {
+func SetService(config global.ServiceConfig) (err error) {
+	if config.ServiceID == "" {
 		return errors.New("ID参数不能为空")
 	}
-	if service.LoadBalance == "" {
+	if config.LoadBalance == "" {
 		return errors.New("LoadBalance参数不能为空")
 	}
+	var newCluster global.Cluster
+	// 获取旧的集群实例
+	oldCluster := FindCluster(config.ServiceID)
+	// 如果原来的集群无效
+	if oldCluster == nil {
+		// 构建新的集群实例
+		newCluster, err = cluster.Build(config)
+		if err != nil {
+			log.Err(err).Caller().Msg("构建集群实例失败")
+			return
+		}
+		// 写入本地服务列表
+		global.Services.Store(config.ServiceID, newCluster)
+		addTotalServices(1)
+		return nil
+	}
 
-	mapValue, exist := global.Services.Load(service.ID)
-	global.Services.Store(service.ID, service)
-	if !exist {
-		return nil
-	}
-	old, ok := mapValue.(global.ServiceType)
-	if !ok {
-		err = errors.New("类型断言失败")
-		log.Error().Caller().Msg(err.Error())
-		return nil
-	}
-	if old.LoadBalance == service.LoadBalance {
-		return nil
-	}
 	// 缓存节点数据
-	mapValue, exist = global.Nodes.Load(service.ID)
-	if !exist {
-		return nil
-	}
-	lb, lbOK := mapValue.(global.LoadBalance)
-	if !lbOK {
-		err = errors.New("类型断言失败")
-		log.Error().Caller().Msg(err.Error())
-		return nil
-	}
-	nodes := lb.Nodes()
-	newNodes := make([]global.NodeType, len(nodes))
-	for k := range nodes {
-		newNodes[k].IP = nodes[k].IP
-		newNodes[k].Port = nodes[k].Port
-		newNodes[k].Weight = nodes[k].Weight
-	}
+	nodes := oldCluster.Nodes()
 	// 构建新的负载均衡实例
-	newLB, err := load_balance.Build(service.LoadBalance)
+	newCluster, err = cluster.Build(config)
 	if err != nil {
-		log.Err(err).Caller().Msg("构建负载均衡实例出错")
-		return err
+		log.Err(err).Caller().Msg("构建集群实例失败")
+		return
 	}
-	for k := range newNodes {
-		newLB.Set(newNodes[k].IP, newNodes[k].Port, newNodes[k].Weight)
+	// 将缓存中的节点写入到新的集群实例中
+	for k := range nodes {
+		newCluster.Set(nodes[k].IP, nodes[k].Port, nodes[k].Weight, nodes[k].Expires)
 	}
-	// 替换旧的实例
-	global.Nodes.Store(service.ID, newLB)
+	// 替换旧的集群实例
+	global.Services.Store(config.ServiceID, newCluster)
 	return nil
 }
 
 // 删除本地数据中的服务
 func DelService(serviceID string) error {
 	global.Services.Delete(serviceID)
+	addTotalServices(-1)
 	return nil
 }
 
-// 从本地数据中匹配服务
-func MatchService(serviceID string) (global.ServiceType, bool) {
-	if serviceID == "" {
-		return global.ServiceType{}, false
-	}
+// 从本地数据中匹配集群实例
+func FindCluster(serviceID string) (ci global.Cluster) {
 	mapValue, exist := global.Services.Load(serviceID)
 	if !exist {
-		return global.ServiceType{}, false
+		return nil
 	}
-	return mapValue.(global.ServiceType), true
+	cluster, ok := mapValue.(global.Cluster)
+	if !ok {
+		return nil
+	}
+	return cluster
+}
+
+// 递值global.TotalServices的值，如果v是负数则递减
+func addTotalServices(v int) {
+	atomic.AddUint32(&global.TotalServices, ^uint32(-v-1))
 }

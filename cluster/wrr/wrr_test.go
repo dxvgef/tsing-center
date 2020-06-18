@@ -1,4 +1,4 @@
-package swrr
+package wrr
 
 import (
 	"log"
@@ -8,7 +8,7 @@ import (
 
 func TestNext(t *testing.T) {
 	var (
-		obj    Instance
+		obj    Cluster
 		ip     string
 		port   uint16
 		weight int

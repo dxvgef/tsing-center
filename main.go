@@ -60,13 +60,7 @@ func main() {
 	}
 
 	// 监听存储中的数据变更
-	go func() {
-		log.Info().Msg("开始监听数据变更")
-		if err = global.Storage.Watch(); err != nil {
-			log.Fatal().Err(err).Caller().Msg("启动存储器监听失败")
-			return
-		}
-	}()
+	watchStorage()
 
 	// 启动API服务
 	if global.Config.API.HTTP.Port > 0 || global.Config.API.HTTPS.Port > 0 {
@@ -164,4 +158,11 @@ func main() {
 	}
 
 	log.Info().Msg("进程已退出")
+}
+
+func watchStorage() {
+	log.Info().Msg("开始监听数据变更")
+	go func() {
+		global.Storage.Watch()
+	}()
 }

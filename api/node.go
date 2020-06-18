@@ -26,6 +26,7 @@ func (self *Node) Add(ctx *tsing.Context) error {
 			ip        string
 			port      uint16
 			weight    int
+			expires   int64
 		}
 	)
 	if err = filter.MSet(
@@ -33,20 +34,23 @@ func (self *Node) Add(ctx *tsing.Context) error {
 		filter.El(&req.ip, filter.FromString(ctx.Post("ip"), "ip").Required().IsIP()),
 		filter.El(&req.port, filter.FromString(ctx.Post("port"), "port").Required().IsDigit().MinInteger(1).MaxInteger(math.MaxUint16)),
 		filter.El(&req.weight, filter.FromString(ctx.Post("weight"), "weight").Required().MinInteger(0).MaxInteger(math.MaxUint16)),
+		filter.El(&req.expires, filter.FromString(ctx.Post("expires"), "expires").MinInteger(0).IsDigit()),
 	); err != nil {
 		resp["error"] = err.Error()
 		return JSON(ctx, 400, &resp)
 	}
-	_, exist := engine.MatchService(req.serviceID)
-	if !exist {
+	ci := engine.FindCluster(req.serviceID)
+	if ci == nil {
 		resp["error"] = "服务不存在"
 		return JSON(ctx, 400, &resp)
 	}
-	if engine.NodeExist(req.serviceID, req.ip, req.port) {
+	node := ci.Find(req.ip, req.port)
+	if node.IP != "" {
 		resp["error"] = "节点已存在"
 		return JSON(ctx, 400, &resp)
 	}
-	if err = global.Storage.SaveNode(req.serviceID, req.ip, req.port, req.weight); err != nil {
+
+	if err = global.Storage.SaveNode(req.serviceID, req.ip, req.port, req.weight, req.expires); err != nil {
 		resp["error"] = err.Error()
 		return JSON(ctx, 500, &resp)
 	}
@@ -64,6 +68,7 @@ func (self *Node) Put(ctx *tsing.Context) error {
 			ip        string
 			port      uint16
 			weight    int
+			expires   int64
 		}
 		port uint64
 	)
@@ -71,6 +76,7 @@ func (self *Node) Put(ctx *tsing.Context) error {
 		filter.El(&req.serviceID, filter.FromString(ctx.PathParams.Value("serviceID"), "serviceID").Required().Base64RawURLDecode()),
 		filter.El(&req.node, filter.FromString(ctx.PathParams.Value("node"), "node").Required().Base64RawURLDecode()),
 		filter.El(&req.weight, filter.FromString(ctx.Post("weight"), "weight").Required().MinInteger(0).MaxInteger(math.MaxUint16)),
+		filter.El(&req.expires, filter.FromString(ctx.Post("expires"), "expires").MinInteger(0).IsDigit()),
 	); err != nil {
 		resp["error"] = err.Error()
 		return JSON(ctx, 400, &resp)
@@ -87,12 +93,12 @@ func (self *Node) Put(ctx *tsing.Context) error {
 	}
 	req.port = uint16(port)
 
-	_, exist := engine.MatchService(req.serviceID)
-	if !exist {
+	ci := engine.FindCluster(req.serviceID)
+	if ci == nil {
 		resp["error"] = "服务不存在"
 		return JSON(ctx, 400, &resp)
 	}
-	if err = global.Storage.SaveNode(req.serviceID, req.ip, req.port, req.weight); err != nil {
+	if err = global.Storage.SaveNode(req.serviceID, req.ip, req.port, req.weight, req.expires); err != nil {
 		resp["error"] = err.Error()
 		return JSON(ctx, 500, &resp)
 	}
@@ -170,11 +176,11 @@ func (self *Node) Active(ctx *tsing.Context) error {
 	}
 	req.port = uint16(port64)
 
-	lb, exist := engine.MatchNode(req.serviceID)
-	if !exist {
+	ci := engine.FindCluster(req.serviceID)
+	if ci == nil {
 		return Status(ctx, 404)
 	}
 
-	lb.Set(req.ip, req.port, -1, time.Now().Add(10*time.Second).Unix())
+	ci.Set(req.ip, req.port, -1, time.Now().Add(10*time.Second).Unix())
 	return Status(ctx, 204)
 }

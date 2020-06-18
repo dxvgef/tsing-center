@@ -11,7 +11,7 @@ import (
 )
 
 // 监听变更
-func (self *Etcd) Watch() error {
+func (self *Etcd) Watch() {
 	ch := self.client.Watch(context.Background(), self.KeyPrefix+"/", clientv3.WithPrefix())
 	for resp := range ch {
 		for _, event := range resp.Events {
@@ -29,7 +29,6 @@ func (self *Etcd) Watch() error {
 			}
 		}
 	}
-	return nil
 }
 
 // 监听存储器数据更新，同步本地数据
@@ -37,7 +36,7 @@ func (self *Etcd) watchLoadData(key, value []byte) error {
 	keyStr := global.BytesToStr(key)
 	// 加载服务
 	if strings.HasPrefix(keyStr, self.KeyPrefix+"/services/") {
-		return self.LoadService(keyStr, value)
+		return self.LoadService(value)
 	}
 	// 加载节点
 	if strings.HasPrefix(keyStr, self.KeyPrefix+"/nodes/") {

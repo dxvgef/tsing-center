@@ -45,15 +45,15 @@ func easyjson794297d0DecodeGithubComDxvgefTsingCenterApi(in *jlexer.Lexer, out *
 				in.Delim('[')
 				if out.Services == nil {
 					if !in.IsDelim(']') {
-						out.Services = make([]global.ServiceType, 0, 2)
+						out.Services = make([]global.ServiceConfig, 0, 2)
 					} else {
-						out.Services = []global.ServiceType{}
+						out.Services = []global.ServiceConfig{}
 					}
 				} else {
 					out.Services = (out.Services)[:0]
 				}
 				for !in.IsDelim(']') {
-					var v1 global.ServiceType
+					var v1 global.ServiceConfig
 					(v1).UnmarshalEasyJSON(in)
 					out.Services = append(out.Services, v1)
 					in.WantComma()
@@ -66,14 +66,14 @@ func easyjson794297d0DecodeGithubComDxvgefTsingCenterApi(in *jlexer.Lexer, out *
 			} else {
 				in.Delim('{')
 				if !in.IsDelim('}') {
-					out.Nodes = make(map[string][]global.NodeType)
+					out.Nodes = make(map[string][]global.Node)
 				} else {
 					out.Nodes = nil
 				}
 				for !in.IsDelim('}') {
 					key := string(in.String())
 					in.WantColon()
-					var v2 []global.NodeType
+					var v2 []global.Node
 					if in.IsNull() {
 						in.Skip()
 						v2 = nil
@@ -81,15 +81,15 @@ func easyjson794297d0DecodeGithubComDxvgefTsingCenterApi(in *jlexer.Lexer, out *
 						in.Delim('[')
 						if v2 == nil {
 							if !in.IsDelim(']') {
-								v2 = make([]global.NodeType, 0, 2)
+								v2 = make([]global.Node, 0, 1)
 							} else {
-								v2 = []global.NodeType{}
+								v2 = []global.Node{}
 							}
 						} else {
 							v2 = (v2)[:0]
 						}
 						for !in.IsDelim(']') {
-							var v3 global.NodeType
+							var v3 global.Node
 							(v3).UnmarshalEasyJSON(in)
 							v2 = append(v2, v3)
 							in.WantComma()
