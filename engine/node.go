@@ -24,9 +24,6 @@ func SetNode(serviceID string, ip string, port uint16, weight int, expires int64
 		return errors.New("服务不存在或不可用")
 	}
 	ci.Set(ip, port, weight, expires)
-
-	// 回写集群实例
-	// global.Clusters.Store(serviceID, lb)
 	return nil
 }
 
@@ -41,7 +38,5 @@ func DelNode(serviceID string, ip string, port uint16) error {
 		global.Services.Delete(serviceID)
 		return nil
 	}
-	// 回写集群实例
-	// global.Services.Store(serviceID, cluster)
 	return nil
 }

@@ -108,8 +108,8 @@ func (self *Service) Next(ctx *tsing.Context) error {
 	// 最多三次重新选取节点的机会
 	for i := 0; i < 3; i++ {
 		ip, port, expires := ci.Next()
-		// 如果已过期
-		if expires < time.Now().Unix() {
+		// 如果存在有效期，并且已过期
+		if expires > 0 && expires < time.Now().Unix() {
 			// 删除该节点
 			ci.Remove(ip, port)
 			continue
