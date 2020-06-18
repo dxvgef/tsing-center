@@ -14,6 +14,7 @@ type NodeType struct {
 	IP              string
 	Port            uint16
 	Weight          int
+	Expires         int64 // 生命周期截止时间(unix时间戳)
 	currentWeight   int
 	effectiveWeight int
 }
@@ -36,14 +37,15 @@ func (self *Instance) Name() string {
 }
 
 // 设置节点
-func (self *Instance) Set(ip string, port uint16, weight int) {
+// 当weight的值<0，表示不更新该属性
+func (self *Instance) Set(ip string, port uint16, weight int, expires int64) {
 	for k := range self.nodes {
 		// 如果节点已存在，则直接更新
 		if self.nodes[k].IP == ip && self.nodes[k].Port == port {
-			if self.nodes[k].Weight != weight {
+			self.nodes[k].Expires = expires
+			if self.nodes[k].Weight >= 0 && self.nodes[k].Weight != weight {
 				self.nodes[k].Weight = weight
 				self.reset()
-				return
 			}
 			return
 		}
@@ -51,9 +53,10 @@ func (self *Instance) Set(ip string, port uint16, weight int) {
 
 	// 插入节点
 	self.nodes = append(self.nodes, NodeType{
-		IP:     ip,
-		Port:   port,
-		Weight: weight,
+		IP:      ip,
+		Port:    port,
+		Weight:  weight,
+		Expires: expires,
 	})
 	self.reset()
 	self.total++
@@ -88,22 +91,24 @@ func (self *Instance) Nodes() []global.NodeType {
 		nodes[k].IP = self.nodes[k].IP
 		nodes[k].Port = self.nodes[k].Port
 		nodes[k].Weight = self.nodes[k].Weight
+		nodes[k].Expires = self.nodes[k].Expires
 	}
 	return nodes
 }
 
 // 选取节点
-func (self *Instance) Next() (string, uint16) {
+func (self *Instance) Next() (string, uint16, int64) {
 	if self.total == 0 {
-		return "", 0
+		return "", 0, 0
 	}
 	if self.total == 1 {
-		return self.nodes[0].IP, self.nodes[0].Port
+		return self.nodes[0].IP, self.nodes[0].Port, self.nodes[0].Expires
 	}
 	var (
-		ip     string
-		port   uint16
-		target *NodeType
+		ip      string
+		port    uint16
+		expires int64
+		target  *NodeType
 	)
 	totalWeight := 0
 	for i := range self.nodes {
@@ -116,14 +121,15 @@ func (self *Instance) Next() (string, uint16) {
 			target = &self.nodes[i]
 			ip = self.nodes[i].IP
 			port = self.nodes[i].Port
+			expires = self.nodes[i].Expires
 		}
 	}
 
 	if target == nil {
-		return "", 0
+		return "", 0, 0
 	}
 	target.currentWeight -= totalWeight
-	return ip, port
+	return ip, port, expires
 }
 
 // 重置所有节点的状态

@@ -15,9 +15,10 @@ type Instance struct {
 }
 
 type NodeType struct {
-	IP     string // 地址
-	Port   uint16 // 端口
-	Weight int    // 权重值
+	IP      string // 地址
+	Port    uint16 // 端口
+	Weight  int    // 权重值
+	Expires int64  // 生命周期截止时间(unix时间戳)
 }
 
 func New() *Instance {
@@ -32,21 +33,28 @@ func (self *Instance) Name() string {
 }
 
 // 设置节点
-func (self *Instance) Set(ip string, port uint16, weight int) {
+// 当weight的值<0，表示不更新该属性
+func (self *Instance) Set(ip string, port uint16, weight int, expires int64) {
 	for k := range self.nodes {
 		if self.nodes[k].IP == ip && self.nodes[k].Port == port {
-			self.nodes[k].Weight = weight
-			self.calcMaxWeight(weight)
+			self.nodes[k].Expires = expires
+			if self.nodes[k].Weight >= 0 && self.nodes[k].Weight != weight {
+				self.nodes[k].Weight = weight
+				self.calcMaxWeight(weight)
+				self.calcAllGCD(self.total)
+			}
 			return
 		}
 	}
 	self.nodes = append(self.nodes, NodeType{
-		IP:     ip,
-		Port:   port,
-		Weight: weight,
+		IP:      ip,
+		Port:    port,
+		Weight:  weight,
+		Expires: expires,
 	})
 	self.total++
 	self.calcMaxWeight(weight)
+	self.calcAllGCD(self.total)
 }
 
 // 获得节点总数
@@ -69,12 +77,12 @@ func (self *Instance) Remove(ip string, port uint16) {
 }
 
 // 选举节点
-func (self *Instance) Next() (string, uint16) {
+func (self *Instance) Next() (string, uint16, int64) {
 	switch self.total {
 	case 0:
-		return "", 0
+		return "", 0, 0
 	case 1:
-		return self.nodes[0].IP, self.nodes[0].Port
+		return self.nodes[0].IP, self.nodes[0].Port, self.nodes[0].Expires
 	}
 
 	var cw, gcd, last, total int
@@ -92,13 +100,13 @@ func (self *Instance) Next() (string, uint16) {
 				newCW = self.maxWeight
 				self.currentWeight = newCW
 				if newCW == 0 {
-					return "", 0
+					return "", 0, 0
 				}
 			}
 		}
 		cw = self.currentWeight
 		if self.nodes[last].Weight >= cw {
-			return self.nodes[last].IP, self.nodes[last].Port
+			return self.nodes[last].IP, self.nodes[last].Port, self.nodes[last].Expires
 		}
 	}
 }
@@ -114,6 +122,7 @@ func (self *Instance) Nodes() []global.NodeType {
 		nodes[k].IP = self.nodes[k].IP
 		nodes[k].Port = self.nodes[k].Port
 		nodes[k].Weight = self.nodes[k].Weight
+		nodes[k].Expires = self.nodes[k].Expires
 	}
 	return nodes
 }

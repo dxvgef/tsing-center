@@ -8,13 +8,13 @@ type ModuleConfig struct {
 
 // 负载均衡接口
 type LoadBalance interface {
-	Name() string              // 算法名称
-	Set(string, uint16, int)   // 设置节点
-	Remove(string, uint16)     // 移除节点
-	Next() (string, uint16)    // 选取节点
-	Total() int                // 节点总数
-	Nodes() []NodeType         // 节点列表
-	Exist(string, uint16) bool // 节点是否存在
+	Name() string                   // 算法名称
+	Set(string, uint16, int, int64) // 设置节点
+	Remove(string, uint16)          // 移除节点
+	Next() (string, uint16)         // 选取节点
+	Total() int                     // 节点总数
+	Nodes() []NodeType              // 节点列表
+	Exist(string, uint16) bool      // 节点是否存在
 }
 
 // 服务
@@ -28,7 +28,7 @@ type NodeType struct {
 	IP      string `json:"ip"`      // 节点IP
 	Port    uint16 `json:"port"`    // 节点端口
 	Weight  int    `json:"weight"`  // 节点权重
-	Expires int    `json:"expires"` // 生命周期截止时间(unix时间戳)，值为0表示一直有效
+	Expires int64  `json:"expires"` // 生命周期截止时间(unix时间戳)，值为0表示一直有效
 }
 
 // 存储器
