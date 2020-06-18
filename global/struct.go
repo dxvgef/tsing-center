@@ -14,7 +14,6 @@ type LoadBalance interface {
 	Next() (string, uint16)         // 选取节点
 	Total() int                     // 节点总数
 	Nodes() []NodeType              // 节点列表
-	Exist(string, uint16) bool      // 节点是否存在
 }
 
 // 服务
