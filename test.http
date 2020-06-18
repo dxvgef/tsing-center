@@ -1,0 +1,51 @@
+### 获得所有数据
+GET http://localhost:20080/data/
+SECRET: 123456
+
+### 将所有数据写入到存储器
+PUT http://localhost:20080/data/
+SECRET: 123456
+
+### 从存储器中加载所有数据
+POST http://localhost:20080/data/
+SECRET: 123456
+
+### 添加服务
+POST http://localhost:20080/services/
+Content-Type: application/x-www-form-urlencoded
+SECRET: 123456
+
+id=test&load_balance=SWRR
+
+### 更新服务
+PUT http://localhost:20080/services/dGVzdA
+Content-Type: application/x-www-form-urlencoded
+SECRET: 123456
+
+load_balance=WRR
+
+### 删除服务
+DELETE http://localhost:20080/services/dGVzdA
+SECRET: 123456
+
+### 从服务中获取节点
+GET http://localhost:20080/services/dGVzdA/next
+SECRET: 123456
+
+### 添加节点
+POST http://localhost:20080/nodes/
+Content-Type: application/x-www-form-urlencoded
+SECRET: 123456
+
+service_id=test&ip=192.168.0.10&port=80&weight=1
+
+### 更新节点
+PUT http://localhost:20080/nodes/dGVzdA/MTI3LjAuMC4xOjExMA
+Content-Type: application/x-www-form-urlencoded
+SECRET: 123456
+
+weight=6
+
+### 删除节点
+DELETE http://localhost:20080/nodes/dGVzdA/MTI3LjAuMC4xOjgw
+SECRET: 123456
