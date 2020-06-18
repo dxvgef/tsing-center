@@ -4,6 +4,7 @@ import (
 	"math"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/rs/zerolog/log"
 
@@ -52,6 +53,7 @@ func (self *Node) Add(ctx *tsing.Context) error {
 
 	return Status(ctx, 204)
 }
+
 func (self *Node) Put(ctx *tsing.Context) error {
 	var (
 		err  error
@@ -133,5 +135,46 @@ func (self *Node) Delete(ctx *tsing.Context) error {
 		resp["error"] = err.Error()
 		return JSON(ctx, 500, &resp)
 	}
+	return Status(ctx, 204)
+}
+
+// 促活
+func (self *Node) Active(ctx *tsing.Context) error {
+	var (
+		err  error
+		resp = make(map[string]string)
+		req  struct {
+			serviceID string
+			node      string
+			ip        string
+			port      uint16
+		}
+		port64 uint64
+	)
+	if err = filter.MSet(
+		filter.El(&req.serviceID, filter.FromString(ctx.PathParams.Value("serviceID"), "serviceID").Required().Base64RawURLDecode()),
+		filter.El(&req.node, filter.FromString(ctx.PathParams.Value("node"), "node").Required().Base64RawURLDecode()),
+	); err != nil {
+		resp["error"] = err.Error()
+		return JSON(ctx, 400, &resp)
+	}
+	pos := strings.Index(req.node, ":")
+	if pos == -1 {
+		log.Debug().Int("pos", pos).Msg("解析node失败")
+		return Status(ctx, 404)
+	}
+	req.ip = req.node[0:pos]
+	port64, err = strconv.ParseUint(req.node[pos+1:], 10, 16)
+	if err != nil {
+		return Status(ctx, 404)
+	}
+	req.port = uint16(port64)
+
+	lb, exist := engine.MatchNode(req.serviceID)
+	if !exist {
+		return Status(ctx, 404)
+	}
+
+	lb.Set(req.ip, req.port, -1, time.Now().Add(10*time.Second).Unix())
 	return Status(ctx, 204)
 }
