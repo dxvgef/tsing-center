@@ -116,7 +116,7 @@ func (self *Cluster) Nodes() []global.Node {
 }
 
 // 选取节点
-func (self *Cluster) Next() (string, uint16, int64) {
+func (self *Cluster) Select() (string, uint16, int64) {
 	if self.total == 0 {
 		return "", 0, 0
 	}

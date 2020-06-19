@@ -29,6 +29,6 @@ func TestNext(t *testing.T) {
 	}
 
 	for i := 0; i < 10; i++ {
-		t.Log(obj.Next())
+		t.Log(obj.Select())
 	}
 }

@@ -95,7 +95,7 @@ func (self *Cluster) Remove(ip string, port uint16) {
 }
 
 // 选举节点
-func (self *Cluster) Next() (string, uint16, int64) {
+func (self *Cluster) Select() (string, uint16, int64) {
 	switch self.total {
 	case 0:
 		return "", 0, 0

@@ -33,13 +33,13 @@ type Node struct {
 
 // 集群接口
 type Cluster interface {
-	Config() ServiceConfig          // 获得配置
-	Set(string, uint16, int, int64) // 设置节点，入参(ip, port, weight, expires)
-	Remove(string, uint16)          // 移除节点，入参(ip, port)
-	Next() (string, uint16, int64)  // 选取节点，出参(ip, port, expires)
-	Total() int                     // 节点总数
-	Nodes() []Node                  // 节点列表
-	Find(string, uint16) Node       // 查找某个节点，入参(ip, port)
+	Config() ServiceConfig           // 获得配置
+	Set(string, uint16, int, int64)  // 设置节点，入参(ip, port, weight, expires)
+	Remove(string, uint16)           // 移除节点，入参(ip, port)
+	Select() (string, uint16, int64) // 选取节点，出参(ip, port, expires)
+	Total() int                      // 节点总数
+	Nodes() []Node                   // 节点列表
+	Find(string, uint16) Node        // 查找某个节点，入参(ip, port)
 }
 
 // 存储器接口
