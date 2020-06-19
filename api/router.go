@@ -17,7 +17,7 @@ func SetRouter(engine *tsing.Engine) {
 	var serviceHandler Service
 	router.POST("/services/", serviceHandler.Add)
 	router.PUT("/services/:serviceID", serviceHandler.Put)
-	router.GET("/services/:serviceID/next", serviceHandler.Next)
+	router.GET("/services/:serviceID/select", serviceHandler.Select)
 	router.DELETE("/services/:serviceID", serviceHandler.Delete)
 
 	// 节点管理

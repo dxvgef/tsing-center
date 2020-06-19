@@ -2,7 +2,6 @@ package api
 
 import (
 	"net/http"
-	"time"
 
 	"github.com/dxvgef/tsing-center/engine"
 	"github.com/dxvgef/tsing-center/global"
@@ -88,7 +87,8 @@ func (self *Service) Delete(ctx *tsing.Context) error {
 	return Status(ctx, 204)
 }
 
-func (self *Service) Next(ctx *tsing.Context) error {
+// 选取节点
+func (self *Service) Select(ctx *tsing.Context) error {
 	var (
 		err       error
 		resp      = make(map[string]interface{})
@@ -105,19 +105,9 @@ func (self *Service) Next(ctx *tsing.Context) error {
 		resp["error"] = "服务不存在"
 		return JSON(ctx, 400, &resp)
 	}
-	// 最多三次重新选取节点的机会
-	for i := 0; i < 3; i++ {
-		ip, port, expires := ci.Select()
-		// 如果存在有效期，并且已过期
-		if expires > 0 && expires < time.Now().Unix() {
-			// 删除该节点
-			ci.Remove(ip, port)
-			continue
-		}
-		resp["ip"] = ip
-		resp["port"] = port
-		break
-	}
+	ip, port, _ := ci.Select()
+	resp["ip"] = ip
+	resp["port"] = port
 	if resp["ip"] == "" {
 		return Status(ctx, http.StatusNotImplemented)
 	}
