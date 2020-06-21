@@ -4,7 +4,6 @@ import (
 	"log"
 	"strconv"
 	"testing"
-	"time"
 )
 
 func TestNext(t *testing.T) {
@@ -24,7 +23,7 @@ func TestNext(t *testing.T) {
 			port = 80
 			weight = 1
 		}
-		obj.Set(ip, port, weight, time.Now().Add(10*time.Minute).Unix())
+		obj.Set(ip, port, weight, 0)
 		log.Println(ip, port, weight)
 	}
 

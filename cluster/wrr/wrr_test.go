@@ -23,7 +23,7 @@ func TestNext(t *testing.T) {
 			port = 80
 			weight = 1
 		}
-		obj.Set(ip, port, weight)
+		obj.Set(ip, port, weight, 0)
 		log.Println(ip, port, weight)
 	}
 

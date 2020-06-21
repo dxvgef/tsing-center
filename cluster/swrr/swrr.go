@@ -133,14 +133,14 @@ func (self *Cluster) Select() (ip string, port uint16, expires int64) {
 	now := time.Now().Unix()
 	var lostNodes []global.Node
 	for i := range self.nodes {
-		if self.nodes[i].expires <= now {
+		if self.nodes[i].weight == 0 {
+			continue
+		}
+		if self.nodes[i].expires > 0 && self.nodes[i].expires <= now {
 			lostNodes = append(lostNodes, global.Node{
 				IP:   self.nodes[i].ip,
 				Port: self.nodes[i].port,
 			})
-			continue
-		}
-		if self.nodes[i].weight == 0 {
 			continue
 		}
 		self.nodes[i].currentWeight += self.nodes[i].effectiveWeight
