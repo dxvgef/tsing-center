@@ -2,7 +2,6 @@ package api
 
 import (
 	"net/http"
-	"time"
 
 	"github.com/dxvgef/tsing-center/engine"
 	"github.com/dxvgef/tsing-center/global"
@@ -106,30 +105,11 @@ func (self *Service) Select(ctx *tsing.Context) error {
 		resp["error"] = "服务不存在"
 		return JSON(ctx, 400, &resp)
 	}
-	total := ci.Total()
-	loseNodes := map[string]global.Node{}
-	for i := 0; i < total; i++ {
-		ip, port, expires := ci.Select()
-		if expires > 0 && expires <= time.Now().Unix() {
-			loseNodes[serviceID] = global.Node{
-				IP:   ip,
-				Port: port,
-			}
-			continue
-		}
-		resp["ip"] = ip
-		resp["port"] = port
-		break
-	}
+	ip, port, _ := ci.Select()
+	resp["ip"] = ip
+	resp["port"] = port
 	if resp["ip"] == "" {
 		return Status(ctx, http.StatusNotImplemented)
 	}
-
-	// 如果发现有过期的节点，则执行清理操作
-	if len(loseNodes) > 0 {
-		// 由于下面还有其它的逻辑，所以此处新开协程执行异步清理
-		go global.Storage.Clean(loseNodes)
-	}
-
 	return JSON(ctx, 200, &resp)
 }

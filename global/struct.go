@@ -57,7 +57,7 @@ type StorageType interface {
 	DeleteLocalNode(string) error                      // 删除本地单个节点，入参(存储器key)
 	DeleteStorageNode(string, string, uint16) error    // 删除存储器中单个节点，入参(服务id, ip, port)
 
-	Clean(map[string]Node) // 清理已失效的节点
+	Clean(string, []Node) // 清理已失效的节点
 
 	Watch() // 监听存储器的数据变更
 }

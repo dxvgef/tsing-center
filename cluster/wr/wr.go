@@ -99,25 +99,47 @@ func (self *Cluster) Remove(ip string, port uint16) {
 }
 
 // 选举出下一个命中的节点
-func (self *Cluster) Select() (string, uint16, int64) {
-	if self.total == 0 {
-		return "", 0, 0
-	}
-	if self.total == 1 {
-		return self.nodes[0].ip, self.nodes[0].port, self.nodes[0].expires
+func (self *Cluster) Select() (ip string, port uint16, expires int64) {
+	switch self.total {
+	case 0:
+		return
+	case 1:
+		ip = self.nodes[0].ip
+		port = self.nodes[0].port
+		expires = self.nodes[0].expires
+		return
 	}
 	if self.rand == nil {
 		self.rand = rand.New(rand.NewSource(time.Now().UnixNano()))
 	}
-
-	randomWeight := self.rand.Intn(self.totalWeight)
+	var (
+		now          = time.Now().Unix()
+		lostNodes    []global.Node
+		randomWeight = self.rand.Intn(self.totalWeight)
+	)
 	for k := range self.nodes {
+		if self.nodes[k].weight == 0 {
+			continue
+		}
+		if self.nodes[k].expires <= now {
+			lostNodes = append(lostNodes, global.Node{
+				IP:   self.nodes[k].ip,
+				Port: self.nodes[k].port,
+			})
+			continue
+		}
 		randomWeight = randomWeight - self.nodes[k].weight
 		if randomWeight <= 0 {
-			return self.nodes[k].ip, self.nodes[k].port, self.nodes[k].expires
+			ip = self.nodes[k].ip
+			port = self.nodes[k].port
+			expires = self.nodes[k].expires
+			break
 		}
 	}
-	return "", 0, 0
+	if len(lostNodes) > 0 {
+		go global.Storage.Clean(self.config.ServiceID, lostNodes)
+	}
+	return
 }
 
 // 获取节点列表

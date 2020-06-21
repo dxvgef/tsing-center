@@ -1,6 +1,8 @@
 package wrr
 
 import (
+	"time"
+
 	"github.com/dxvgef/tsing-center/global"
 )
 
@@ -95,15 +97,22 @@ func (self *Cluster) Remove(ip string, port uint16) {
 }
 
 // 选举节点
-func (self *Cluster) Select() (string, uint16, int64) {
+func (self *Cluster) Select() (ip string, port uint16, expires int64) {
 	switch self.total {
 	case 0:
-		return "", 0, 0
+		return
 	case 1:
-		return self.nodes[0].ip, self.nodes[0].port, self.nodes[0].expires
+		ip = self.nodes[0].ip
+		port = self.nodes[0].port
+		expires = self.nodes[0].expires
+		return
 	}
 
-	var cw, gcd, last, total int
+	var (
+		cw, gcd, last, total int
+		lostNodes            []global.Node
+		now                  = time.Now().Unix()
+	)
 	for {
 		last = self.lastIndex
 		total = self.total
@@ -118,15 +127,32 @@ func (self *Cluster) Select() (string, uint16, int64) {
 				newCW = self.maxWeight
 				self.currentWeight = newCW
 				if newCW == 0 {
-					return "", 0, 0
+					break
 				}
 			}
 		}
+		if self.nodes[last].weight == 0 {
+			continue
+		}
+		if self.nodes[last].expires <= now {
+			lostNodes = append(lostNodes, global.Node{
+				IP:   self.nodes[last].ip,
+				Port: self.nodes[last].port,
+			})
+			continue
+		}
 		cw = self.currentWeight
 		if self.nodes[last].weight >= cw {
-			return self.nodes[last].ip, self.nodes[last].port, self.nodes[last].expires
+			ip = self.nodes[last].ip
+			port = self.nodes[last].port
+			expires = self.nodes[last].expires
+			break
 		}
 	}
+	if len(lostNodes) > 0 {
+		go global.Storage.Clean(self.config.ServiceID, lostNodes)
+	}
+	return
 }
 
 // 获取节点列表
