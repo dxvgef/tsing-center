@@ -4,7 +4,6 @@ import (
 	"math"
 	"strconv"
 	"strings"
-	"time"
 
 	"github.com/rs/zerolog/log"
 
@@ -144,8 +143,8 @@ func (self *Node) Delete(ctx *tsing.Context) error {
 	return Status(ctx, 204)
 }
 
-// 促活
-func (self *Node) Active(ctx *tsing.Context) error {
+// 更新到期时间
+func (self *Node) UpdateExpires(ctx *tsing.Context) error {
 	var (
 		err  error
 		resp = make(map[string]string)
@@ -154,12 +153,14 @@ func (self *Node) Active(ctx *tsing.Context) error {
 			node      string
 			ip        string
 			port      uint16
+			expires   int64
 		}
 		port64 uint64
 	)
 	if err = filter.MSet(
 		filter.El(&req.serviceID, filter.FromString(ctx.PathParams.Value("serviceID"), "serviceID").Required().Base64RawURLDecode()),
 		filter.El(&req.node, filter.FromString(ctx.PathParams.Value("node"), "node").Required().Base64RawURLDecode()),
+		filter.El(&req.expires, filter.FromString(ctx.Post("expires"), "expires").Required().IsDigit().MinInteger(0)),
 	); err != nil {
 		resp["error"] = err.Error()
 		return JSON(ctx, 400, &resp)
@@ -181,6 +182,6 @@ func (self *Node) Active(ctx *tsing.Context) error {
 		return Status(ctx, 404)
 	}
 
-	ci.Set(req.ip, req.port, -1, time.Now().Add(10*time.Second).Unix())
+	ci.Set(req.ip, req.port, -1, req.expires)
 	return Status(ctx, 204)
 }
