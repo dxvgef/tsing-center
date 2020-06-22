@@ -15,21 +15,21 @@ POST http://localhost:20080/services/
 Content-Type: application/x-www-form-urlencoded
 SECRET: 123456
 
-id=test&load_balance=SWRR
+id=test_service&load_balance=SWRR
 
 ### 更新服务
-PUT http://localhost:20080/services/dGVzdA
+PUT http://localhost:20080/services/dGVzdF9zZXJ2aWNl
 Content-Type: application/x-www-form-urlencoded
 SECRET: 123456
 
-load_balance=WRR
+load_balance=SWRR
 
 ### 删除服务
-DELETE http://localhost:20080/services/dGVzdA
+DELETE http://localhost:20080/services/dGVzdF9zZXJ2aWNl
 SECRET: 123456
 
 ### 从服务中获取节点
-GET http://localhost:20080/services/dGVzdA/next
+GET http://localhost:20080/services/dGVzdF9zZXJ2aWNl/select
 SECRET: 123456
 
 ### 添加节点
@@ -37,15 +37,15 @@ POST http://localhost:20080/nodes/
 Content-Type: application/x-www-form-urlencoded
 SECRET: 123456
 
-service_id=test&ip=192.168.0.10&port=80&weight=1
+service_id=test_service&ip=127.0.0.1&port=30080&weight=1
 
 ### 更新节点
-PUT http://localhost:20080/nodes/dGVzdA/MTI3LjAuMC4xOjExMA
+PUT http://localhost:20080/nodes/dGVzdF9zZXJ2aWNl/MTI3LjAuMC4xOjMwMDgw
 Content-Type: application/x-www-form-urlencoded
 SECRET: 123456
 
-weight=6
+weight=1
 
 ### 删除节点
-DELETE http://localhost:20080/nodes/dGVzdA/MTI3LjAuMC4xOjgw
+DELETE http://localhost:20080/nodes/dGVzdF9zZXJ2aWNl/MTI3LjAuMC4xOjMwMDgw
 SECRET: 123456
