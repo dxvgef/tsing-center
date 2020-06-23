@@ -1,4 +1,4 @@
-# tsing-center
+# service-center
 
 使用Go开发的服务中心，提供服务注册、发现、负载均衡、熔断等服务治理功能，并且实现了去中心化的集群部署模式。
 
@@ -9,11 +9,11 @@
 业务逻辑的流程如下：
 1. 客户端请求到达API网关
 2. API网关根据路由匹配到服务
-3. API网关根据服务的设置向`Tsing Center`发送获取目标节点的请求
-4. `Tsing Center`通过负载均衡策略选取出一个目标节点，并返回给API网关
+3. API网关根据服务的设置向服务中心发送获取目标节点的请求
+4. 服务中心通过负载均衡策略选取出一个目标节点，并返回给API网关
 5. API网关将客户端请求反向代理到目标节点
 
 
 ## 安装方法
 
-至`Release`页面下载最新版本的压缩包，解压后编辑默认的`config.yml`文件，并运行`tsing-center`二进制文件(Windows系统运行`tsing-center.exe`文件)。
+至`Release`页面下载最新版本的压缩包，解压后编辑默认的`config.yml`文件，并运行`service-center`二进制文件(Windows系统运行`service-center.exe`文件)。

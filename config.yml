@@ -19,7 +19,7 @@ storage:
     # 存储器配置json字符串
     config: '{
         "endpoints": ["http://127.0.0.1:2379"],
-        "key_prefix": "/tsing-center"
+        "key_prefix": "/service-center"
     }
     '
 # API服务
