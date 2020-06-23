@@ -9,9 +9,9 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/dxvgef/tsing-center/api"
-	"github.com/dxvgef/tsing-center/global"
-	"github.com/dxvgef/tsing-center/storage"
+	"local/api"
+	"local/global"
+	"local/storage"
 
 	"github.com/bwmarrin/snowflake"
 	"github.com/dxvgef/tsing"

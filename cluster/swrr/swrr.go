@@ -3,7 +3,7 @@ package swrr
 import (
 	"time"
 
-	"github.com/dxvgef/tsing-center/global"
+	"local/global"
 )
 
 // 平滑加权轮循(与nginx类似)算法的集群

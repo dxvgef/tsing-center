@@ -5,8 +5,8 @@ import (
 
 	"github.com/rs/zerolog/log"
 
-	"github.com/dxvgef/tsing-center/global"
-	"github.com/dxvgef/tsing-center/storage/etcd"
+	"local/global"
+	"local/storage/etcd"
 )
 
 // 构建存储器实例

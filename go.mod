@@ -1,4 +1,4 @@
-module github.com/dxvgef/tsing-center
+module local
 
 go 1.14
 

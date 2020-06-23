@@ -6,8 +6,8 @@ import (
 
 	"github.com/rs/zerolog/log"
 
-	"github.com/dxvgef/tsing-center/cluster"
-	"github.com/dxvgef/tsing-center/global"
+	"local/cluster"
+	"local/global"
 )
 
 // 设置本地数据中的服务

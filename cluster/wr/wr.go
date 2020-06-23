@@ -4,7 +4,7 @@ import (
 	"math/rand"
 	"time"
 
-	"github.com/dxvgef/tsing-center/global"
+	"local/global"
 )
 
 // 加权随机算法的集群

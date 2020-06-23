@@ -4,10 +4,10 @@ package api
 
 import (
 	json "encoding/json"
-	global "github.com/dxvgef/tsing-center/global"
 	easyjson "github.com/mailru/easyjson"
 	jlexer "github.com/mailru/easyjson/jlexer"
 	jwriter "github.com/mailru/easyjson/jwriter"
+	global "local/global"
 )
 
 // suppress unused package warning
@@ -18,7 +18,7 @@ var (
 	_ easyjson.Marshaler
 )
 
-func easyjson794297d0DecodeGithubComDxvgefTsingCenterApi(in *jlexer.Lexer, out *Data) {
+func easyjson794297d0DecodeLocalApi(in *jlexer.Lexer, out *Data) {
 	isTopLevel := in.IsStart()
 	if in.IsNull() {
 		if isTopLevel {
@@ -111,7 +111,7 @@ func easyjson794297d0DecodeGithubComDxvgefTsingCenterApi(in *jlexer.Lexer, out *
 		in.Consumed()
 	}
 }
-func easyjson794297d0EncodeGithubComDxvgefTsingCenterApi(out *jwriter.Writer, in Data) {
+func easyjson794297d0EncodeLocalApi(out *jwriter.Writer, in Data) {
 	out.RawByte('{')
 	first := true
 	_ = first
@@ -171,23 +171,23 @@ func easyjson794297d0EncodeGithubComDxvgefTsingCenterApi(out *jwriter.Writer, in
 // MarshalJSON supports json.Marshaler interface
 func (v Data) MarshalJSON() ([]byte, error) {
 	w := jwriter.Writer{}
-	easyjson794297d0EncodeGithubComDxvgefTsingCenterApi(&w, v)
+	easyjson794297d0EncodeLocalApi(&w, v)
 	return w.Buffer.BuildBytes(), w.Error
 }
 
 // MarshalEasyJSON supports easyjson.Marshaler interface
 func (v Data) MarshalEasyJSON(w *jwriter.Writer) {
-	easyjson794297d0EncodeGithubComDxvgefTsingCenterApi(w, v)
+	easyjson794297d0EncodeLocalApi(w, v)
 }
 
 // UnmarshalJSON supports json.Unmarshaler interface
 func (v *Data) UnmarshalJSON(data []byte) error {
 	r := jlexer.Lexer{Data: data}
-	easyjson794297d0DecodeGithubComDxvgefTsingCenterApi(&r, v)
+	easyjson794297d0DecodeLocalApi(&r, v)
 	return r.Error()
 }
 
 // UnmarshalEasyJSON supports easyjson.Unmarshaler interface
 func (v *Data) UnmarshalEasyJSON(l *jlexer.Lexer) {
-	easyjson794297d0DecodeGithubComDxvgefTsingCenterApi(l, v)
+	easyjson794297d0DecodeLocalApi(l, v)
 }

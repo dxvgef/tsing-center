@@ -3,7 +3,7 @@ package engine
 import (
 	"errors"
 
-	"github.com/dxvgef/tsing-center/global"
+	"local/global"
 )
 
 // 设置本地数据中的节点

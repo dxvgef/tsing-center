@@ -3,7 +3,7 @@ package etcd
 import (
 	"github.com/rs/zerolog/log"
 
-	"github.com/dxvgef/tsing-center/global"
+	"local/global"
 )
 
 // 批理清理无效的节点

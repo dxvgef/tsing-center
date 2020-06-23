@@ -4,10 +4,10 @@ import (
 	"errors"
 	"strings"
 
-	"github.com/dxvgef/tsing-center/cluster/swrr"
-	"github.com/dxvgef/tsing-center/cluster/wr"
-	"github.com/dxvgef/tsing-center/cluster/wrr"
-	"github.com/dxvgef/tsing-center/global"
+	"local/cluster/swrr"
+	"local/cluster/wr"
+	"local/cluster/wrr"
+	"local/global"
 )
 
 // 构建一个使用指定负载均衡算法的集群实例

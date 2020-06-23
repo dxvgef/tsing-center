@@ -3,7 +3,7 @@ package api
 import (
 	"github.com/dxvgef/tsing"
 
-	"github.com/dxvgef/tsing-center/global"
+	"local/global"
 )
 
 func checkSecretFromHeader(ctx *tsing.Context) error {

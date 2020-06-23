@@ -5,8 +5,8 @@ import (
 
 	"github.com/rs/zerolog/log"
 
-	"github.com/dxvgef/tsing-center/engine"
-	"github.com/dxvgef/tsing-center/global"
+	"local/engine"
+	"local/global"
 
 	"github.com/dxvgef/filter"
 	"github.com/dxvgef/tsing"

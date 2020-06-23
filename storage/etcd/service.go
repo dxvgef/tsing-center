@@ -7,8 +7,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/dxvgef/tsing-center/engine"
-	"github.com/dxvgef/tsing-center/global"
+	"local/engine"
+	"local/global"
 
 	"github.com/rs/zerolog/log"
 )

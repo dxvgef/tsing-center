@@ -3,7 +3,7 @@ package wrr
 import (
 	"time"
 
-	"github.com/dxvgef/tsing-center/global"
+	"local/global"
 )
 
 // 加权轮循(与LVS类似)算法的集群

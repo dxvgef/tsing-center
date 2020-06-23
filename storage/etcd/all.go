@@ -10,7 +10,7 @@ import (
 	"github.com/coreos/etcd/clientv3"
 	"github.com/rs/zerolog/log"
 
-	"github.com/dxvgef/tsing-center/global"
+	"local/global"
 )
 
 // 加载所有数据

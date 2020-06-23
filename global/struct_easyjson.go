@@ -17,7 +17,7 @@ var (
 	_ easyjson.Marshaler
 )
 
-func easyjson9f2eff5fDecodeGithubComDxvgefTsingCenterGlobal(in *jlexer.Lexer, out *ServiceConfig) {
+func easyjson9f2eff5fDecodeLocalGlobal(in *jlexer.Lexer, out *ServiceConfig) {
 	isTopLevel := in.IsStart()
 	if in.IsNull() {
 		if isTopLevel {
@@ -50,7 +50,7 @@ func easyjson9f2eff5fDecodeGithubComDxvgefTsingCenterGlobal(in *jlexer.Lexer, ou
 		in.Consumed()
 	}
 }
-func easyjson9f2eff5fEncodeGithubComDxvgefTsingCenterGlobal(out *jwriter.Writer, in ServiceConfig) {
+func easyjson9f2eff5fEncodeLocalGlobal(out *jwriter.Writer, in ServiceConfig) {
 	out.RawByte('{')
 	first := true
 	_ = first
@@ -70,27 +70,27 @@ func easyjson9f2eff5fEncodeGithubComDxvgefTsingCenterGlobal(out *jwriter.Writer,
 // MarshalJSON supports json.Marshaler interface
 func (v ServiceConfig) MarshalJSON() ([]byte, error) {
 	w := jwriter.Writer{}
-	easyjson9f2eff5fEncodeGithubComDxvgefTsingCenterGlobal(&w, v)
+	easyjson9f2eff5fEncodeLocalGlobal(&w, v)
 	return w.Buffer.BuildBytes(), w.Error
 }
 
 // MarshalEasyJSON supports easyjson.Marshaler interface
 func (v ServiceConfig) MarshalEasyJSON(w *jwriter.Writer) {
-	easyjson9f2eff5fEncodeGithubComDxvgefTsingCenterGlobal(w, v)
+	easyjson9f2eff5fEncodeLocalGlobal(w, v)
 }
 
 // UnmarshalJSON supports json.Unmarshaler interface
 func (v *ServiceConfig) UnmarshalJSON(data []byte) error {
 	r := jlexer.Lexer{Data: data}
-	easyjson9f2eff5fDecodeGithubComDxvgefTsingCenterGlobal(&r, v)
+	easyjson9f2eff5fDecodeLocalGlobal(&r, v)
 	return r.Error()
 }
 
 // UnmarshalEasyJSON supports easyjson.Unmarshaler interface
 func (v *ServiceConfig) UnmarshalEasyJSON(l *jlexer.Lexer) {
-	easyjson9f2eff5fDecodeGithubComDxvgefTsingCenterGlobal(l, v)
+	easyjson9f2eff5fDecodeLocalGlobal(l, v)
 }
-func easyjson9f2eff5fDecodeGithubComDxvgefTsingCenterGlobal1(in *jlexer.Lexer, out *Node) {
+func easyjson9f2eff5fDecodeLocalGlobal1(in *jlexer.Lexer, out *Node) {
 	isTopLevel := in.IsStart()
 	if in.IsNull() {
 		if isTopLevel {
@@ -127,7 +127,7 @@ func easyjson9f2eff5fDecodeGithubComDxvgefTsingCenterGlobal1(in *jlexer.Lexer, o
 		in.Consumed()
 	}
 }
-func easyjson9f2eff5fEncodeGithubComDxvgefTsingCenterGlobal1(out *jwriter.Writer, in Node) {
+func easyjson9f2eff5fEncodeLocalGlobal1(out *jwriter.Writer, in Node) {
 	out.RawByte('{')
 	first := true
 	_ = first
@@ -157,23 +157,23 @@ func easyjson9f2eff5fEncodeGithubComDxvgefTsingCenterGlobal1(out *jwriter.Writer
 // MarshalJSON supports json.Marshaler interface
 func (v Node) MarshalJSON() ([]byte, error) {
 	w := jwriter.Writer{}
-	easyjson9f2eff5fEncodeGithubComDxvgefTsingCenterGlobal1(&w, v)
+	easyjson9f2eff5fEncodeLocalGlobal1(&w, v)
 	return w.Buffer.BuildBytes(), w.Error
 }
 
 // MarshalEasyJSON supports easyjson.Marshaler interface
 func (v Node) MarshalEasyJSON(w *jwriter.Writer) {
-	easyjson9f2eff5fEncodeGithubComDxvgefTsingCenterGlobal1(w, v)
+	easyjson9f2eff5fEncodeLocalGlobal1(w, v)
 }
 
 // UnmarshalJSON supports json.Unmarshaler interface
 func (v *Node) UnmarshalJSON(data []byte) error {
 	r := jlexer.Lexer{Data: data}
-	easyjson9f2eff5fDecodeGithubComDxvgefTsingCenterGlobal1(&r, v)
+	easyjson9f2eff5fDecodeLocalGlobal1(&r, v)
 	return r.Error()
 }
 
 // UnmarshalEasyJSON supports easyjson.Unmarshaler interface
 func (v *Node) UnmarshalEasyJSON(l *jlexer.Lexer) {
-	easyjson9f2eff5fDecodeGithubComDxvgefTsingCenterGlobal1(l, v)
+	easyjson9f2eff5fDecodeLocalGlobal1(l, v)
 }

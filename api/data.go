@@ -4,7 +4,7 @@ import (
 	"github.com/dxvgef/tsing"
 	"github.com/rs/zerolog/log"
 
-	"github.com/dxvgef/tsing-center/global"
+	"local/global"
 )
 
 type Data struct {
