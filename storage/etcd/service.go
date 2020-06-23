@@ -17,7 +17,7 @@ import (
 func (self *Etcd) LoadService(data []byte) (err error) {
 	var service global.ServiceConfig
 	if err = service.UnmarshalJSON(data); err != nil {
-		log.Err(err).Caller().Msg("解码服务配置失败")
+		log.Err(err).Caller().Send()
 		return
 	}
 	return engine.SetService(service)
@@ -28,7 +28,7 @@ func (self *Etcd) SaveService(config global.ServiceConfig) (err error) {
 	var configBytes []byte
 	configBytes, err = config.MarshalJSON()
 	if err != nil {
-		log.Err(err).Caller().Msg("编码服务配置失败")
+		log.Err(err).Caller().Send()
 		return
 	}
 
@@ -39,6 +39,7 @@ func (self *Etcd) SaveService(config global.ServiceConfig) (err error) {
 	ctx, ctxCancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer ctxCancel()
 	if _, err = self.client.Put(ctx, key.String(), global.BytesToStr(configBytes)); err != nil {
+		log.Err(err).Caller().Send()
 		return err
 	}
 	return nil
@@ -48,6 +49,7 @@ func (self *Etcd) SaveService(config global.ServiceConfig) (err error) {
 func (self *Etcd) DeleteLocalService(key string) error {
 	serviceID, err := global.DecodeKey(path.Base(key))
 	if err != nil {
+		log.Err(err).Caller().Send()
 		return err
 	}
 	return engine.DelService(serviceID)
@@ -67,7 +69,7 @@ func (self *Etcd) DeleteStorageService(serviceID string) error {
 	defer ctxCancel()
 	_, err := self.client.Delete(ctx, key.String())
 	if err != nil {
-		log.Err(err).Caller().Msg("删除存储器中的服务数据失败")
+		log.Err(err).Caller().Send()
 		return err
 	}
 	return nil

@@ -3,6 +3,8 @@ package storage
 import (
 	"errors"
 
+	"github.com/rs/zerolog/log"
+
 	"github.com/dxvgef/tsing-center/global"
 	"github.com/dxvgef/tsing-center/storage/etcd"
 )
@@ -14,6 +16,7 @@ func Build(name, config string) (global.StorageType, error) {
 	case "etcd":
 		sa, err := etcd.New(config)
 		if err != nil {
+			log.Err(err).Caller().Send()
 			return nil, err
 		}
 		// global.StorageKeyPrefix = sa.KeyPrefix

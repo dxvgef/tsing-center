@@ -10,7 +10,7 @@ import (
 func (self *Etcd) Clean(serviceID string, nodes []global.Node) (err error) {
 	for k := range nodes {
 		if err = self.DeleteStorageNode(serviceID, nodes[k].IP, nodes[k].Port); err != nil {
-			log.Err(err).Str("ip", nodes[k].IP).Uint16("port", nodes[k].Port).Caller().Msg("清理无效的节点失败")
+			log.Err(err).Str("ip", nodes[k].IP).Uint16("port", nodes[k].Port).Caller().Send()
 			return
 		}
 	}

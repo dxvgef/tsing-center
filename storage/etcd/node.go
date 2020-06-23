@@ -29,6 +29,7 @@ func (self *Etcd) LoadNode(key string, data []byte) error {
 	// 从key中解析serviceID, ip, port
 	serviceID, ip, port, err := self.ParseNode(key, keyPrefix.String())
 	if err != nil {
+		log.Err(err).Caller().Send()
 		return err
 	}
 
@@ -36,7 +37,7 @@ func (self *Etcd) LoadNode(key string, data []byte) error {
 	var value NodeValue
 	err = value.UnmarshalJSON(data)
 	if err != nil {
-		log.Err(err).Caller().Msg("解码节点属性失败")
+		log.Err(err).Caller().Send()
 		return err
 	}
 
@@ -67,13 +68,14 @@ func (self *Etcd) SaveNode(serviceID, ip string, port uint16, weight int, expire
 	value.Expires = expires
 	valueBytes, err = value.MarshalJSON()
 	if err != nil {
-		log.Err(err).Caller().Msg("编码节点属性失败")
+		log.Err(err).Caller().Send()
 		return
 	}
 
 	ctx, ctxCancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer ctxCancel()
 	if _, err = self.client.Put(ctx, key.String(), global.BytesToStr(valueBytes)); err != nil {
+		log.Err(err).Caller().Send()
 		return err
 	}
 	return nil
@@ -86,6 +88,7 @@ func (self *Etcd) DeleteLocalNode(key string) error {
 	keyPrefix.WriteString("/nodes/")
 	serviceID, ip, port, err := self.ParseNode(key, keyPrefix.String())
 	if err != nil {
+		log.Err(err).Caller().Send()
 		return err
 	}
 	return engine.DelNode(serviceID, ip, port)
@@ -119,7 +122,7 @@ func (self *Etcd) DeleteStorageNode(serviceID, ip string, port uint16) error {
 	defer ctxCancel()
 	_, err := self.client.Delete(ctx, key.String())
 	if err != nil {
-		log.Err(err).Caller().Msg("删除存储器中的服务数据失败")
+		log.Err(err).Caller().Send()
 		return err
 	}
 	return nil
@@ -135,19 +138,20 @@ func (self *Etcd) ParseNode(key, prefix string) (serviceID, ip string, port uint
 	var nodePart string
 	nodePart, err = global.DecodeKey(path.Base(key))
 	if err != nil {
+		log.Err(err).Caller().Send()
 		return
 	}
 	pos := strings.Index(nodePart, ":")
 	if pos == -1 {
 		err = errors.New("解析节点信息失败")
-		log.Error().Caller().Msg("解析节点信息失败")
+		log.Err(err).Caller().Send()
 		return
 	}
 	ip = nodePart[0:pos]
 	p, er := strconv.Atoi(nodePart[pos+1:])
 	if er != nil {
 		err = er
-		log.Err(err).Caller().Msg("解析节点信息失败")
+		log.Err(err).Caller().Send()
 		return
 	}
 	port = uint16(p)
@@ -156,7 +160,7 @@ func (self *Etcd) ParseNode(key, prefix string) (serviceID, ip string, port uint
 	pos = strings.Index(key, "/")
 	if pos == -1 {
 		err = errors.New("解析服务ID信息失败")
-		log.Error().Caller().Msg("解析服务ID信息失败")
+		log.Err(err).Caller().Send()
 		return
 	}
 

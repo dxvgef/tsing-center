@@ -3,6 +3,8 @@ package api
 import (
 	"net/http"
 
+	"github.com/rs/zerolog/log"
+
 	"github.com/dxvgef/tsing-center/engine"
 	"github.com/dxvgef/tsing-center/global"
 
@@ -22,6 +24,7 @@ func (self *Service) Add(ctx *tsing.Context) error {
 		filter.El(&config.ServiceID, filter.FromString(ctx.Post("id"), "id").Required()),
 		filter.El(&config.LoadBalance, filter.FromString(ctx.Post("load_balance"), "load_balance")),
 	); err != nil {
+		// 来自客户端的数据，无需记录日志
 		resp["error"] = err.Error()
 		return JSON(ctx, 400, &resp)
 	}
@@ -35,6 +38,7 @@ func (self *Service) Add(ctx *tsing.Context) error {
 	}
 
 	if err = global.Storage.SaveService(config); err != nil {
+		log.Err(err).Caller().Send()
 		resp["error"] = err.Error()
 		return JSON(ctx, 500, &resp)
 	}
@@ -51,6 +55,7 @@ func (self *Service) Put(ctx *tsing.Context) error {
 		filter.El(&config.ServiceID, filter.FromString(ctx.PathParams.Value("serviceID"), "serviceID").Required().Base64RawURLDecode()),
 		filter.El(&config.LoadBalance, filter.FromString(ctx.Post("load_balance"), "load_balance")),
 	); err != nil {
+		// 来自客户端的数据，无需记录日志
 		resp["error"] = err.Error()
 		return JSON(ctx, 400, &resp)
 	}
@@ -60,6 +65,7 @@ func (self *Service) Put(ctx *tsing.Context) error {
 	}
 
 	if err = global.Storage.SaveService(config); err != nil {
+		log.Err(err).Caller().Send()
 		resp["error"] = err.Error()
 		return JSON(ctx, 500, &resp)
 	}
@@ -74,6 +80,7 @@ func (self *Service) Delete(ctx *tsing.Context) error {
 		serviceID string
 	)
 	if serviceID, err = global.DecodeKey(ctx.PathParams.Value("serviceID")); err != nil {
+		// 来自客户端的数据，无需记录日志
 		return Status(ctx, 404)
 	}
 	if _, exist := global.Services.Load(serviceID); !exist {
@@ -81,6 +88,7 @@ func (self *Service) Delete(ctx *tsing.Context) error {
 	}
 	err = global.Storage.DeleteStorageService(ctx.PathParams.Value("serviceID"))
 	if err != nil {
+		log.Err(err).Caller().Send()
 		resp["error"] = err.Error()
 		return JSON(ctx, 500, &resp)
 	}
@@ -97,6 +105,7 @@ func (self *Service) Select(ctx *tsing.Context) error {
 	if err = filter.MSet(
 		filter.El(&serviceID, filter.FromString(ctx.PathParams.Value("serviceID"), "serviceID").Required().Base64RawURLDecode()),
 	); err != nil {
+		// 来自客户端的数据，无需记录日志
 		resp["error"] = err.Error()
 		return JSON(ctx, 400, &resp)
 	}

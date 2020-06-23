@@ -35,6 +35,7 @@ func (self *Node) Add(ctx *tsing.Context) error {
 		filter.El(&req.weight, filter.FromString(ctx.Post("weight"), "weight").Required().MinInteger(0).MaxInteger(math.MaxUint16)),
 		filter.El(&req.expires, filter.FromString(ctx.Post("expires"), "expires").MinInteger(0).IsDigit()),
 	); err != nil {
+		// 来自客户端的数据，无需记录日志
 		resp["error"] = err.Error()
 		return JSON(ctx, 400, &resp)
 	}
@@ -50,6 +51,7 @@ func (self *Node) Add(ctx *tsing.Context) error {
 	}
 
 	if err = global.Storage.SaveNode(req.serviceID, req.ip, req.port, req.weight, req.expires); err != nil {
+		log.Err(err).Caller().Send()
 		resp["error"] = err.Error()
 		return JSON(ctx, 500, &resp)
 	}
@@ -77,17 +79,19 @@ func (self *Node) Put(ctx *tsing.Context) error {
 		filter.El(&req.weight, filter.FromString(ctx.Post("weight"), "weight").Required().MinInteger(0).MaxInteger(math.MaxUint16)),
 		filter.El(&req.expires, filter.FromString(ctx.Post("expires"), "expires").MinInteger(0).IsDigit()),
 	); err != nil {
+		// 来自客户端的数据，无需记录日志
 		resp["error"] = err.Error()
 		return JSON(ctx, 400, &resp)
 	}
 	pos := strings.Index(req.node, ":")
 	if pos == -1 {
-		log.Debug().Int("pos", pos).Msg("解析node失败")
+		// 来自客户端的数据，无需记录日志
 		return Status(ctx, 404)
 	}
 	req.ip = req.node[0:pos]
 	port, err = strconv.ParseUint(req.node[pos+1:], 10, 16)
 	if err != nil {
+		// 来自客户端的数据，无需记录日志
 		return Status(ctx, 404)
 	}
 	req.port = uint16(port)
@@ -98,6 +102,7 @@ func (self *Node) Put(ctx *tsing.Context) error {
 		return JSON(ctx, 400, &resp)
 	}
 	if err = global.Storage.SaveNode(req.serviceID, req.ip, req.port, req.weight, req.expires); err != nil {
+		log.Err(err).Caller().Send()
 		resp["error"] = err.Error()
 		return JSON(ctx, 500, &resp)
 	}
@@ -121,22 +126,26 @@ func (self *Node) Delete(ctx *tsing.Context) error {
 		filter.El(&req.serviceID, filter.FromString(ctx.PathParams.Value("serviceID"), "serviceID").Required().Base64RawURLDecode()),
 		filter.El(&req.node, filter.FromString(ctx.PathParams.Value("node"), "node").Required().Base64RawURLDecode()),
 	); err != nil {
+		// 来自客户端的数据，无需记录日志
 		resp["error"] = err.Error()
 		return JSON(ctx, 400, &resp)
 	}
 	pos := strings.Index(req.node, ":")
 	if pos == -1 {
+		// 来自客户端的数据，无需记录日志
 		return Status(ctx, 404)
 	}
 	req.ip = req.node[0:pos]
 	port, err = strconv.ParseUint(req.node[pos:], 10, 16)
 	if err != nil {
+		// 来自客户端的数据，无需记录日志
 		return Status(ctx, 404)
 	}
 	req.port = uint16(port)
 
 	err = global.Storage.DeleteStorageNode(req.serviceID, req.ip, req.port)
 	if err != nil {
+		log.Err(err).Caller().Send()
 		resp["error"] = err.Error()
 		return JSON(ctx, 500, &resp)
 	}
@@ -162,23 +171,26 @@ func (self *Node) UpdateExpires(ctx *tsing.Context) error {
 		filter.El(&req.node, filter.FromString(ctx.PathParams.Value("node"), "node").Required().Base64RawURLDecode()),
 		filter.El(&req.expires, filter.FromString(ctx.Post("expires"), "expires").Required().IsDigit().MinInteger(0)),
 	); err != nil {
+		// 来自客户端的数据，无需记录日志
 		resp["error"] = err.Error()
 		return JSON(ctx, 400, &resp)
 	}
 	pos := strings.Index(req.node, ":")
 	if pos == -1 {
-		log.Debug().Int("pos", pos).Msg("解析node失败")
+		// 来自客户端的数据，无需记录日志
 		return Status(ctx, 404)
 	}
 	req.ip = req.node[0:pos]
 	port64, err = strconv.ParseUint(req.node[pos+1:], 10, 16)
 	if err != nil {
+		// 来自客户端的数据，无需记录日志
 		return Status(ctx, 404)
 	}
 	req.port = uint16(port64)
 
 	ci := engine.FindCluster(req.serviceID)
 	if ci == nil {
+		// 来自客户端的数据，无需记录日志
 		return Status(ctx, 404)
 	}
 

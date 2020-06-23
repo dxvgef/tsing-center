@@ -33,13 +33,13 @@ func (self *Etcd) LoadAll() error {
 	key.WriteString("/services/")
 	resp, err := self.client.Get(ctx, key.String(), clientv3.WithPrefix())
 	if err != nil {
-		log.Err(err).Caller().Msg("获取服务列表失败")
+		log.Err(err).Caller().Send()
 		return err
 	}
 	for k := range resp.Kvs {
 		err = self.LoadService(resp.Kvs[k].Value)
 		if err != nil {
-			log.Err(err).Caller().Msg("写入数据到本地失败")
+			log.Err(err).Caller().Send()
 			return err
 		}
 	}
@@ -50,13 +50,13 @@ func (self *Etcd) LoadAll() error {
 	key.WriteString("/nodes/")
 	resp, err = self.client.Get(ctx, key.String(), clientv3.WithPrefix())
 	if err != nil {
-		log.Err(err).Caller().Msg("获取节点列表失败")
+		log.Err(err).Caller().Send()
 		return err
 	}
 	for k := range resp.Kvs {
 		err = self.LoadNode(global.BytesToStr(resp.Kvs[k].Key), resp.Kvs[k].Value)
 		if err != nil {
-			log.Err(err).Caller().Msg("写入数据到本地失败")
+			log.Err(err).Caller().Send()
 			return err
 		}
 	}
@@ -69,17 +69,17 @@ func (self *Etcd) SaveAll() (err error) {
 	global.Services.Range(func(key, value interface{}) bool {
 		ci, ok := value.(global.Cluster)
 		if !ok {
-			log.Error().Caller().Msg("类型断言失败")
+			log.Error().Caller().Send()
 			return false
 		}
 		if err = self.SaveService(ci.Config()); err != nil {
-			log.Err(err).Caller().Msg("存储服务数据失败")
+			log.Err(err).Caller().Send()
 			return false
 		}
 		nodes := ci.Nodes()
 		for k := range nodes {
 			if err = self.SaveNode(ci.Config().ServiceID, nodes[k].IP, nodes[k].Port, nodes[k].Weight, nodes[k].Expires); err != nil {
-				log.Err(err).Caller().Msg("存储节点数据失败")
+				log.Err(err).Caller().Send()
 				return false
 			}
 		}

@@ -26,7 +26,7 @@ func SetService(config global.ServiceConfig) (err error) {
 		// 构建新的集群实例
 		newCluster, err = cluster.Build(config)
 		if err != nil {
-			log.Err(err).Caller().Msg("构建集群实例失败")
+			log.Err(err).Caller().Send()
 			return
 		}
 		// 写入本地服务列表
@@ -40,7 +40,7 @@ func SetService(config global.ServiceConfig) (err error) {
 	// 构建新的负载均衡实例
 	newCluster, err = cluster.Build(config)
 	if err != nil {
-		log.Err(err).Caller().Msg("构建集群实例失败")
+		log.Err(err).Caller().Send()
 		return
 	}
 	// 将缓存中的节点写入到新的集群实例中
