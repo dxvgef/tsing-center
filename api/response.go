@@ -2,8 +2,10 @@ package api
 
 import (
 	"encoding/json"
+	"net/http"
 
 	"github.com/dxvgef/tsing"
+	"github.com/rs/zerolog/log"
 )
 
 // 输出JSON数据给客户端
@@ -38,5 +40,8 @@ func String(ctx *tsing.Context, status int, data string) error {
 // 输出HTTP状态码，无返回数据
 func Status(ctx *tsing.Context, status int) error {
 	ctx.ResponseWriter.WriteHeader(status)
+	if _, err := ctx.ResponseWriter.Write([]byte(http.StatusText(status))); err != nil {
+		log.Err(err).Caller().Send()
+	}
 	return nil
 }
