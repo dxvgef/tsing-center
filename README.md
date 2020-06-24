@@ -27,10 +27,17 @@
 - [x] WRR，加权轮循，类似LVS
 - [x] WR，加权随机
 
+## 相关资源
+
+- [Tsing](https://github.com/dxvgef/tsing) 高性能、微核心的Go语言HTTP服务框架
+- [Tsing Gateway](https://github.com/dxvgef/tsing-gateway) 开源、跨平台、去中心化集群、动态配置的API网关
+
+## 用户及案例
+
+如果你在使用本项目，请通过[Issues](https://github.com/dxvgef/tsing-center/issues)告知我们项目的简介
+
 ## 帮助/说明
 
-本项目处于开发初期阶段，API和数据存储结构会频繁变更，暂不建议在生产环境中使用，并且暂不提供已编译的二进制文件下载，可自行下载源代码编译。
+本项目处于开发初期阶段，API和数据存储结构可能会频繁变更，暂不建议在生产环境中使用，如有问题可在[Issues](https://github.com/dxvgef/tsing-center/issues)里提出。
 
 诚邀更多的开发者为本项目开发管理面板和官方网站等资源，帮助这个开源项目更好的发展。
-
-如有问题可在Issues里提出。
