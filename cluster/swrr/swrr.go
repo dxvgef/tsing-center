@@ -3,6 +3,8 @@ package swrr
 import (
 	"time"
 
+	"github.com/rs/zerolog/log"
+
 	"local/global"
 )
 
@@ -160,7 +162,12 @@ func (self *Cluster) Select() (ip string, port uint16, expires int64) {
 	}
 	target.currentWeight -= totalWeight
 	if len(lostNodes) > 0 {
-		go global.Storage.Clean(self.config.ServiceID, lostNodes)
+		go func() {
+			if err := global.Storage.Clean(self.config.ServiceID, lostNodes); err != nil {
+				log.Err(err).Caller().Send()
+				return
+			}
+		}()
 	}
 	return
 }
