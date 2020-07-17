@@ -121,10 +121,15 @@ func (self *Cluster) Nodes() []global.Node {
 
 // 选取节点
 func (self *Cluster) Select() (ip string, port uint16, expires int64) {
+	now := time.Now().Unix()
+
 	switch self.total {
 	case 0:
 		return
 	case 1:
+		if self.nodes[0].expires>0 && self.nodes[0].expires<=now {
+			return
+		}
 		ip = self.nodes[0].ip
 		port = self.nodes[0].port
 		expires = self.nodes[0].expires
@@ -132,7 +137,6 @@ func (self *Cluster) Select() (ip string, port uint16, expires int64) {
 	}
 	var target *Node
 	totalWeight := 0
-	now := time.Now().Unix()
 	var lostNodes []global.Node
 	for i := range self.nodes {
 		if self.nodes[i].weight == 0 {
@@ -161,6 +165,7 @@ func (self *Cluster) Select() (ip string, port uint16, expires int64) {
 		return
 	}
 	target.currentWeight -= totalWeight
+
 	if len(lostNodes) > 0 {
 		go func() {
 			if err := global.Storage.Clean(self.config.ServiceID, lostNodes); err != nil {

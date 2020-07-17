@@ -100,10 +100,15 @@ func (self *Cluster) Remove(ip string, port uint16) {
 
 // 选举节点
 func (self *Cluster) Select() (ip string, port uint16, expires int64) {
+	now := time.Now().Unix()
+
 	switch self.total {
 	case 0:
 		return
 	case 1:
+		if self.nodes[0].expires > 0 && self.nodes[0].expires <= now {
+			return
+		}
 		ip = self.nodes[0].ip
 		port = self.nodes[0].port
 		expires = self.nodes[0].expires
@@ -113,7 +118,6 @@ func (self *Cluster) Select() (ip string, port uint16, expires int64) {
 	var (
 		cw, gcd, last, total int
 		lostNodes            []global.Node
-		now                  = time.Now().Unix()
 	)
 	for {
 		last = self.lastIndex
