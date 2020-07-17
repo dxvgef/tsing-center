@@ -25,5 +25,5 @@ func SetRouter(engine *tsing.Engine) {
 	router.POST("/nodes/", nodeHandler.Add)
 	router.PUT("/nodes/:serviceID/:node", nodeHandler.Put)
 	router.DELETE("/nodes/:serviceID/:node", nodeHandler.Delete)
-	router.PATCH("/nodes/:serviceID/:node", nodeHandler.UpdateExpires)
+	router.PATCH("/nodes/:serviceID/:node", nodeHandler.Touch)
 }

@@ -5,8 +5,6 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/rs/zerolog/log"
-
 	"local/engine"
 	"local/global"
 
@@ -51,9 +49,7 @@ func (self *Node) Add(ctx *tsing.Context) error {
 	}
 
 	if err = global.Storage.SaveNode(req.serviceID, req.ip, req.port, req.weight, req.expires); err != nil {
-		log.Err(err).Caller().Send()
-		resp["error"] = err.Error()
-		return JSON(ctx, 500, &resp)
+		return ctx.Caller(err)
 	}
 
 	return Status(ctx, 204)
@@ -102,9 +98,7 @@ func (self *Node) Put(ctx *tsing.Context) error {
 		return JSON(ctx, 400, &resp)
 	}
 	if err = global.Storage.SaveNode(req.serviceID, req.ip, req.port, req.weight, req.expires); err != nil {
-		log.Err(err).Caller().Send()
-		resp["error"] = err.Error()
-		return JSON(ctx, 500, &resp)
+		return ctx.Caller(err)
 	}
 
 	return Status(ctx, 204)
@@ -145,15 +139,13 @@ func (self *Node) Delete(ctx *tsing.Context) error {
 
 	err = global.Storage.DeleteStorageNode(req.serviceID, req.ip, req.port)
 	if err != nil {
-		log.Err(err).Caller().Send()
-		resp["error"] = err.Error()
-		return JSON(ctx, 500, &resp)
+		return ctx.Caller(err)
 	}
 	return Status(ctx, 204)
 }
 
-// 更新到期时间
-func (self *Node) UpdateExpires(ctx *tsing.Context) error {
+// 更新节点生命周期的截止时间
+func (self *Node) Touch(ctx *tsing.Context) error {
 	var (
 		err  error
 		resp = make(map[string]string)
@@ -166,6 +158,8 @@ func (self *Node) UpdateExpires(ctx *tsing.Context) error {
 		}
 		port64 uint64
 	)
+
+	// 验证请求参数
 	if err = filter.Batch(
 		filter.String(ctx.PathParams.Value("serviceID"), "serviceID").Require().Base64RawURLDecode().Set(&req.serviceID),
 		filter.String(ctx.PathParams.Value("node"), "node").Require().Base64RawURLDecode().Set(&req.node),
@@ -188,12 +182,26 @@ func (self *Node) UpdateExpires(ctx *tsing.Context) error {
 	}
 	req.port = uint16(port64)
 
+	// 获取集群
 	ci := engine.FindCluster(req.serviceID)
 	if ci == nil {
 		// 来自客户端的数据，无需记录日志
 		return Status(ctx, 404)
 	}
 
-	ci.Set(req.ip, req.port, -1, req.expires)
+	// 获取节点
+	node := ci.Find(req.ip, req.port)
+	if node.IP == "" {
+		return Status(ctx, 404)
+	}
+
+	// 更新本地内存数据
+	ci.Set(req.ip, req.port, node.Weight, req.expires)
+
+	// 更新存储引擎中的数据
+	if err = global.Storage.SaveNode(req.serviceID, node.IP, node.Port, node.Weight, req.expires); err != nil {
+		return ctx.Caller(err)
+	}
+
 	return Status(ctx, 204)
 }
