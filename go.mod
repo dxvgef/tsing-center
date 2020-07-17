@@ -18,6 +18,7 @@ require (
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible // indirect
 	github.com/dustin/go-humanize v1.0.0 // indirect
 	github.com/dxvgef/filter v1.8.1
+	github.com/dxvgef/filter/v2 v2.1.3
 	github.com/dxvgef/tsing v1.2.2
 	github.com/gogo/protobuf v1.3.1 // indirect
 	github.com/golang/groupcache v0.0.0-20200121045136-8c9f03a8e57e // indirect

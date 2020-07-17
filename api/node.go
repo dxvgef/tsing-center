@@ -10,7 +10,7 @@ import (
 	"local/engine"
 	"local/global"
 
-	"github.com/dxvgef/filter"
+	"github.com/dxvgef/filter/v2"
 	"github.com/dxvgef/tsing"
 )
 
@@ -28,12 +28,12 @@ func (self *Node) Add(ctx *tsing.Context) error {
 			expires   int64
 		}
 	)
-	if err = filter.MSet(
-		filter.El(&req.serviceID, filter.FromString(ctx.Post("service_id"), "service_id").Required()),
-		filter.El(&req.ip, filter.FromString(ctx.Post("ip"), "ip").Required().IsIP()),
-		filter.El(&req.port, filter.FromString(ctx.Post("port"), "port").Required().IsDigit().MinInteger(1).MaxInteger(math.MaxUint16)),
-		filter.El(&req.weight, filter.FromString(ctx.Post("weight"), "weight").Required().MinInteger(0).MaxInteger(math.MaxUint16)),
-		filter.El(&req.expires, filter.FromString(ctx.Post("expires"), "expires").MinInteger(0).IsDigit()),
+	if err = filter.Batch(
+		filter.String(ctx.Post("service_id"), "service_id").Require().Set(&req.serviceID),
+		filter.String(ctx.Post("ip"), "ip").Require().IsIP().Set(&req.ip),
+		filter.String(ctx.Post("port"), "port").Require().IsDigit().MinInteger(1).MaxInteger(math.MaxUint16).Set(&req.port),
+		filter.String(ctx.Post("weight"), "weight").Require().MinInteger(0).MaxInteger(math.MaxUint16).Set(&req.weight),
+		filter.String(ctx.Post("expires"), "expires").MinInteger(0).IsDigit().Set(&req.expires),
 	); err != nil {
 		// 来自客户端的数据，无需记录日志
 		resp["error"] = err.Error()
@@ -73,11 +73,11 @@ func (self *Node) Put(ctx *tsing.Context) error {
 		}
 		port uint64
 	)
-	if err = filter.MSet(
-		filter.El(&req.serviceID, filter.FromString(ctx.PathParams.Value("serviceID"), "serviceID").Required().Base64RawURLDecode()),
-		filter.El(&req.node, filter.FromString(ctx.PathParams.Value("node"), "node").Required().Base64RawURLDecode()),
-		filter.El(&req.weight, filter.FromString(ctx.Post("weight"), "weight").Required().MinInteger(0).MaxInteger(math.MaxUint16)),
-		filter.El(&req.expires, filter.FromString(ctx.Post("expires"), "expires").MinInteger(0).IsDigit()),
+	if err = filter.Batch(
+		filter.String(ctx.PathParams.Value("serviceID"), "serviceID").Require().Base64RawURLDecode().Set(&req.serviceID),
+		filter.String(ctx.PathParams.Value("node"), "node").Require().Base64RawURLDecode().Set(&req.node),
+		filter.String(ctx.Post("weight"), "weight").Require().MinInteger(0).MaxInteger(math.MaxUint16).Set(&req.weight),
+		filter.String(ctx.Post("expires"), "expires").MinInteger(0).IsDigit().Set(&req.expires),
 	); err != nil {
 		// 来自客户端的数据，无需记录日志
 		resp["error"] = err.Error()
@@ -122,9 +122,9 @@ func (self *Node) Delete(ctx *tsing.Context) error {
 		}
 		port uint64
 	)
-	if err = filter.MSet(
-		filter.El(&req.serviceID, filter.FromString(ctx.PathParams.Value("serviceID"), "serviceID").Required().Base64RawURLDecode()),
-		filter.El(&req.node, filter.FromString(ctx.PathParams.Value("node"), "node").Required().Base64RawURLDecode()),
+	if err = filter.Batch(
+		filter.String(ctx.PathParams.Value("serviceID"), "serviceID").Require().Base64RawURLDecode().Set(&req.serviceID),
+		filter.String(ctx.PathParams.Value("node"), "node").Require().Base64RawURLDecode().Set(&req.node),
 	); err != nil {
 		// 来自客户端的数据，无需记录日志
 		resp["error"] = err.Error()
@@ -166,10 +166,10 @@ func (self *Node) UpdateExpires(ctx *tsing.Context) error {
 		}
 		port64 uint64
 	)
-	if err = filter.MSet(
-		filter.El(&req.serviceID, filter.FromString(ctx.PathParams.Value("serviceID"), "serviceID").Required().Base64RawURLDecode()),
-		filter.El(&req.node, filter.FromString(ctx.PathParams.Value("node"), "node").Required().Base64RawURLDecode()),
-		filter.El(&req.expires, filter.FromString(ctx.Post("expires"), "expires").Required().IsDigit().MinInteger(0)),
+	if err = filter.Batch(
+		filter.String(ctx.PathParams.Value("serviceID"), "serviceID").Require().Base64RawURLDecode().Set(&req.serviceID),
+		filter.String(ctx.PathParams.Value("node"), "node").Require().Base64RawURLDecode().Set(&req.node),
+		filter.String(ctx.Post("expires"), "expires").Require().IsDigit().MinInteger(0).Set(&req.expires),
 	); err != nil {
 		// 来自客户端的数据，无需记录日志
 		resp["error"] = err.Error()

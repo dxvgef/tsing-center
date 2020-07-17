@@ -8,7 +8,7 @@ import (
 	"local/engine"
 	"local/global"
 
-	"github.com/dxvgef/filter"
+	"github.com/dxvgef/filter/v2"
 	"github.com/dxvgef/tsing"
 )
 
@@ -20,9 +20,9 @@ func (self *Service) Add(ctx *tsing.Context) error {
 		resp   = make(map[string]string)
 		config global.ServiceConfig
 	)
-	if err = filter.MSet(
-		filter.El(&config.ServiceID, filter.FromString(ctx.Post("id"), "id").Required()),
-		filter.El(&config.LoadBalance, filter.FromString(ctx.Post("load_balance"), "load_balance")),
+	if err = filter.Batch(
+		filter.String(ctx.Post("id"), "id").Require().Set(&config.ServiceID),
+		filter.String(ctx.Post("load_balance"), "load_balance").Require().Set(&config.LoadBalance),
 	); err != nil {
 		// 来自客户端的数据，无需记录日志
 		resp["error"] = err.Error()
@@ -51,9 +51,9 @@ func (self *Service) Put(ctx *tsing.Context) error {
 		resp   = make(map[string]string)
 		config global.ServiceConfig
 	)
-	if err = filter.MSet(
-		filter.El(&config.ServiceID, filter.FromString(ctx.PathParams.Value("serviceID"), "serviceID").Required().Base64RawURLDecode()),
-		filter.El(&config.LoadBalance, filter.FromString(ctx.Post("load_balance"), "load_balance")),
+	if err = filter.Batch(
+		filter.String(ctx.PathParams.Value("serviceID"), "serviceID").Require().Base64RawURLDecode().Set(&config.ServiceID),
+		filter.String(ctx.Post("load_balance"), "load_balance").Require().Set(&config.LoadBalance),
 	); err != nil {
 		// 来自客户端的数据，无需记录日志
 		resp["error"] = err.Error()
@@ -102,9 +102,7 @@ func (self *Service) Select(ctx *tsing.Context) error {
 		resp      = make(map[string]interface{})
 		serviceID string
 	)
-	if err = filter.MSet(
-		filter.El(&serviceID, filter.FromString(ctx.PathParams.Value("serviceID"), "serviceID").Required().Base64RawURLDecode()),
-	); err != nil {
+	if serviceID, err = filter.String(ctx.PathParams.Value("serviceID"), "serviceID").Require().Base64RawURLDecode().String(); err != nil {
 		// 来自客户端的数据，无需记录日志
 		resp["error"] = err.Error()
 		return JSON(ctx, 400, &resp)
