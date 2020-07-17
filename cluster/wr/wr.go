@@ -108,7 +108,7 @@ func (self *Cluster) Select() (ip string, port uint16, expires int64) {
 	case 0:
 		return
 	case 1:
-		if self.nodes[0].expires > 0 && self.nodes[0].expires <= now {
+		if self.nodes[0].weight < 0 || (self.nodes[0].expires > 0 && self.nodes[0].expires <= now) {
 			return
 		}
 		ip = self.nodes[0].ip
