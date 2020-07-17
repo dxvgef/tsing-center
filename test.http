@@ -17,7 +17,7 @@ SECRET: 123456
 
 id=test_service&load_balance=SWRR
 
-### 更新服务
+### 替换或创建服务
 PUT http://localhost:20080/services/dGVzdF9zZXJ2aWNl
 Content-Type: application/x-www-form-urlencoded
 SECRET: 123456
@@ -39,12 +39,19 @@ SECRET: 123456
 
 service_id=test_service&ip=127.0.0.1&port=30080&weight=1
 
-### 更新节点
+### 替换或创建节点
 PUT http://localhost:20080/nodes/dGVzdF9zZXJ2aWNl/MTI3LjAuMC4xOjMwMDgw
 Content-Type: application/x-www-form-urlencoded
 SECRET: 123456
 
 weight=1
+
+### 更新节点的属性
+PATCH http://localhost:20080/nodes/dGVzdF9zZXJ2aWNl/MTI3LjAuMC4xOjMwMDgw
+Content-Type: application/x-www-form-urlencoded
+SECRET: 123456
+
+weight=1&expires=0
 
 ### 删除节点
 DELETE http://localhost:20080/nodes/dGVzdF9zZXJ2aWNl/MTI3LjAuMC4xOjMwMDgw
