@@ -150,6 +150,93 @@ func (self *Node) Delete(ctx *tsing.Context) error {
 	return Status(ctx, 204)
 }
 
+// 更新节点属性
+func (self *Node) Patch(ctx *tsing.Context) error {
+	var (
+		err  error
+		resp = make(map[string]string)
+		req  struct {
+			serviceID string
+			node      string
+			ip        string
+			port      uint16
+			attrs     []string
+		}
+		port64 uint64
+	)
+
+	// 验证请求参数
+	if err = filter.Batch(
+		filter.String(ctx.PathParams.Value("serviceID"), "serviceID").Require().Base64RawURLDecode().Set(&req.serviceID),
+		filter.String(ctx.PathParams.Value("node"), "node").Require().Base64RawURLDecode().Set(&req.node),
+		filter.String(ctx.PathParams.Value("attrs"), "attrs").Require().EnumSliceString(",", []string{"expires", "weight"}).SetSlice(&req.attrs, ","),
+	); err != nil {
+		// 来自客户端的数据，无需记录日志
+		resp["error"] = err.Error()
+		return JSON(ctx, 400, &resp)
+	}
+	pos := strings.Index(req.node, ":")
+	if pos == -1 {
+		// 来自客户端的数据，无需记录日志
+		return Status(ctx, 404)
+	}
+	req.ip = req.node[0:pos]
+	port64, err = strconv.ParseUint(req.node[pos+1:], 10, 16)
+	if err != nil {
+		// 来自客户端的数据，无需记录日志
+		return Status(ctx, 404)
+	}
+	req.port = uint16(port64)
+
+	// 获取集群
+	ci := engine.FindCluster(req.serviceID)
+	if ci == nil {
+		// 来自客户端的数据，无需记录日志
+		return Status(ctx, 404)
+	}
+
+	// 获取节点
+	node := ci.Find(req.ip, req.port)
+	if node.IP == "" {
+		return Status(ctx, 404)
+	}
+
+	for k := range req.attrs {
+		if req.attrs[k] == "weight" {
+			if _, exist := ctx.PostParam("weight"); !exist {
+				resp["error"] = "weight值无效"
+				return JSON(ctx, 400, &resp)
+			}
+			node.Weight, err = filter.String(ctx.Post("weight"), "weight").Require().IsDigit().MinInteger(0).Int()
+			if err != nil {
+				resp["error"] = err.Error()
+				return JSON(ctx, 400, &resp)
+			}
+		}
+		if req.attrs[k] == "expires" {
+			if _, exist := ctx.PostParam("expires"); !exist {
+				resp["error"] = "expires值不能为空"
+				return JSON(ctx, 400, &resp)
+			}
+			node.Expires, err = filter.String(ctx.Post("expires"), "expires").Require().IsDigit().MinInteger(0).Int64()
+			if err != nil {
+				resp["error"] = err.Error()
+				return JSON(ctx, 400, &resp)
+			}
+		}
+	}
+
+	// 更新本地内存数据
+	ci.Set(node.IP, node.Port, node.Weight, node.Expires)
+
+	// 更新存储引擎中的数据
+	if err = global.Storage.SaveNode(req.serviceID, node.IP, node.Port, node.Weight, node.Expires); err != nil {
+		return ctx.Caller(err)
+	}
+
+	return Status(ctx, 204)
+}
+
 // 更新节点生命周期的截止时间
 func (self *Node) Touch(ctx *tsing.Context) error {
 	var (
