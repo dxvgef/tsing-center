@@ -4,7 +4,6 @@ package etcd
 
 import (
 	json "encoding/json"
-
 	easyjson "github.com/mailru/easyjson"
 	jlexer "github.com/mailru/easyjson/jlexer"
 	jwriter "github.com/mailru/easyjson/jwriter"
@@ -37,10 +36,14 @@ func easyjsonCdfae1c8DecodeLocalStorageEtcd(in *jlexer.Lexer, out *NodeData) {
 			continue
 		}
 		switch key {
+		case "ttl":
+			out.TTL = uint(in.Uint())
 		case "expires":
 			out.Expires = int64(in.Int64())
 		case "weight":
 			out.Weight = int(in.Int())
+		case "meta":
+			out.Meta = string(in.String())
 		default:
 			in.SkipRecursive()
 		}
@@ -55,10 +58,20 @@ func easyjsonCdfae1c8EncodeLocalStorageEtcd(out *jwriter.Writer, in NodeData) {
 	out.RawByte('{')
 	first := true
 	_ = first
-	if in.Expires != 0 {
-		const prefix string = ",\"expires\":"
+	if in.TTL != 0 {
+		const prefix string = ",\"ttl\":"
 		first = false
 		out.RawString(prefix[1:])
+		out.Uint(uint(in.TTL))
+	}
+	if in.Expires != 0 {
+		const prefix string = ",\"expires\":"
+		if first {
+			first = false
+			out.RawString(prefix[1:])
+		} else {
+			out.RawString(prefix)
+		}
 		out.Int64(int64(in.Expires))
 	}
 	if in.Weight != 0 {
@@ -70,6 +83,16 @@ func easyjsonCdfae1c8EncodeLocalStorageEtcd(out *jwriter.Writer, in NodeData) {
 			out.RawString(prefix)
 		}
 		out.Int(int(in.Weight))
+	}
+	if in.Meta != "" {
+		const prefix string = ",\"meta\":"
+		if first {
+			first = false
+			out.RawString(prefix[1:])
+		} else {
+			out.RawString(prefix)
+		}
+		out.String(string(in.Meta))
 	}
 	out.RawByte('}')
 }
