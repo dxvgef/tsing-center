@@ -40,6 +40,8 @@ func easyjson9f2eff5fDecodeLocalGlobal(in *jlexer.Lexer, out *ServiceConfig) {
 			out.ServiceID = string(in.String())
 		case "load_balance":
 			out.LoadBalance = string(in.String())
+		case "mete":
+			out.Mete = string(in.String())
 		default:
 			in.SkipRecursive()
 		}
@@ -63,6 +65,11 @@ func easyjson9f2eff5fEncodeLocalGlobal(out *jwriter.Writer, in ServiceConfig) {
 		const prefix string = ",\"load_balance\":"
 		out.RawString(prefix)
 		out.String(string(in.LoadBalance))
+	}
+	if in.Mete != "" {
+		const prefix string = ",\"mete\":"
+		out.RawString(prefix)
+		out.String(string(in.Mete))
 	}
 	out.RawByte('}')
 }
@@ -115,8 +122,12 @@ func easyjson9f2eff5fDecodeLocalGlobal1(in *jlexer.Lexer, out *Node) {
 			out.Port = uint16(in.Uint16())
 		case "weight":
 			out.Weight = int(in.Int())
+		case "ttl":
+			out.TTL = uint(in.Uint())
 		case "expires":
 			out.Expires = int64(in.Int64())
+		case "mete":
+			out.Mete = string(in.String())
 		default:
 			in.SkipRecursive()
 		}
@@ -147,9 +158,19 @@ func easyjson9f2eff5fEncodeLocalGlobal1(out *jwriter.Writer, in Node) {
 		out.Int(int(in.Weight))
 	}
 	{
+		const prefix string = ",\"ttl\":"
+		out.RawString(prefix)
+		out.Uint(uint(in.TTL))
+	}
+	{
 		const prefix string = ",\"expires\":"
 		out.RawString(prefix)
 		out.Int64(int64(in.Expires))
+	}
+	if in.Mete != "" {
+		const prefix string = ",\"mete\":"
+		out.RawString(prefix)
+		out.String(string(in.Mete))
 	}
 	out.RawByte('}')
 }

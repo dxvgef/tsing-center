@@ -19,17 +19,19 @@ var (
 
 // 服务配置，用作集群构建时的参数
 type ServiceConfig struct {
-	ServiceID   string `json:"service_id"`   // 服务ID
-	LoadBalance string `json:"load_balance"` // 负载
+	ServiceID   string `json:"service_id"`     // 服务ID
+	LoadBalance string `json:"load_balance"`   // 负载
+	Mete        string `json:"mete,omitempty"` // 元信息(JSON字符串)
 }
 
 // 节点属性
 type Node struct {
-	IP      string `json:"ip"`      // 节点IP
-	Port    uint16 `json:"port"`    // 节点端口
-	Weight  int    `json:"weight"`  // 节点权重
-	TTL     uint   `json:"ttl"`     // TTL(秒)
-	Expires int64  `json:"expires"` // 生命周期截止时间(unix时间戳)，值为0表示一直有效
+	IP      string `json:"ip"`             // 节点IP
+	Port    uint16 `json:"port"`           // 节点端口
+	Weight  int    `json:"weight"`         // 节点权重
+	TTL     uint   `json:"ttl"`            // TTL(秒)
+	Expires int64  `json:"expires"`        // 生命周期截止时间(unix时间戳)，值为0表示一直有效
+	Mete    string `json:"mete,omitempty"` // 元信息(JSON字符串)
 }
 
 // 集群接口
