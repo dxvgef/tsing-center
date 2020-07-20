@@ -62,7 +62,6 @@ func (self *Cluster) Find(ip string, port uint16) (node global.Node) {
 }
 
 // 重写或创建节点
-// 当weight的值<0，表示不更新该属性
 func (self *Cluster) Set(node global.Node) {
 	for k := range self.nodes {
 		// 如果节点已存在，则直接更新
