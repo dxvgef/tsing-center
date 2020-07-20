@@ -7,14 +7,14 @@ import (
 )
 
 // 设置本地数据中的节点
-func SetNode(serviceID string, ip string, port uint16, weight int, expires int64) (err error) {
+func SetNode(serviceID string, node global.Node) (err error) {
 	if serviceID == "" {
 		return errors.New("serviceID参数不能为空")
 	}
-	if ip == "" {
+	if node.IP == "" {
 		return errors.New("ip参数不能为空")
 	}
-	if port == 0 {
+	if node.Port == 0 {
 		return errors.New("port参数不能为0")
 	}
 
@@ -23,7 +23,7 @@ func SetNode(serviceID string, ip string, port uint16, weight int, expires int64
 	if ci == nil {
 		return errors.New("服务不存在或不可用")
 	}
-	ci.Set(ip, port, weight, expires)
+	ci.Set(node)
 	return nil
 }
 

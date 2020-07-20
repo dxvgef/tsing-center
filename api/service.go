@@ -90,7 +90,7 @@ func (self *Service) Delete(ctx *tsing.Context) error {
 func (self *Service) Select(ctx *tsing.Context) error {
 	var (
 		err       error
-		resp      = make(map[string]interface{})
+		resp      = make(map[string]string)
 		serviceID string
 	)
 	if serviceID, err = filter.String(ctx.PathParams.Value("serviceID"), "serviceID").Require().Base64RawURLDecode().String(); err != nil {
@@ -103,11 +103,9 @@ func (self *Service) Select(ctx *tsing.Context) error {
 		resp["error"] = "服务不存在"
 		return JSON(ctx, 400, &resp)
 	}
-	ip, port, _ := ci.Select()
-	resp["ip"] = ip
-	resp["port"] = port
+	node := ci.Select()
 	if resp["ip"] == "" {
 		return Status(ctx, http.StatusNotImplemented)
 	}
-	return JSON(ctx, 200, &resp)
+	return JSON(ctx, 200, &node)
 }

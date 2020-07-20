@@ -14,8 +14,9 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
-// 节点值结构
-type NodeValue struct {
+// 节点数据
+type NodeData struct {
+	TTL     uint  `json:"ttl,omitempty"`     // 生命周期(秒)
 	Expires int64 `json:"expires,omitempty"` // 生命周期截止时间(unix时间戳)
 	Weight  int   `json:"weight,omitempty"`  // 权重值
 }
@@ -34,7 +35,7 @@ func (self *Etcd) LoadNode(key string, data []byte) error {
 	}
 
 	// 从value中解析expires, weight
-	var value NodeValue
+	var value NodeData
 	err = value.UnmarshalJSON(data)
 	if err != nil {
 		log.Err(err).Caller().Send()
@@ -42,30 +43,36 @@ func (self *Etcd) LoadNode(key string, data []byte) error {
 	}
 
 	// 写入节点到本地
-	return engine.SetNode(serviceID, ip, port, value.Weight, value.Expires)
+	return engine.SetNode(serviceID, global.Node{
+		IP:      ip,
+		Port:    port,
+		TTL:     value.TTL,
+		Weight:  value.Weight,
+		Expires: value.Expires,
+	})
 }
 
 // 将本地节点数据保存到存储器中，如果不存在则创建
-func (self *Etcd) SaveNode(serviceID, ip string, port uint16, weight int, expires int64) (err error) {
+func (self *Etcd) SaveNode(serviceID string, node global.Node) (err error) {
 	var key strings.Builder
-	key.WriteString(ip)
+	key.WriteString(node.IP)
 	key.WriteString(":")
-	key.WriteString(strconv.FormatUint(uint64(port), 10))
-	node := global.EncodeKey(key.String())
+	key.WriteString(strconv.FormatUint(uint64(node.Port), 10))
+	nodeKey := global.EncodeKey(key.String())
 
 	key.Reset()
 	key.WriteString(self.KeyPrefix)
 	key.WriteString("/nodes/")
 	key.WriteString(global.EncodeKey(serviceID))
 	key.WriteString("/")
-	key.WriteString(node)
+	key.WriteString(nodeKey)
 
 	var (
-		value      NodeValue
+		value      NodeData
 		valueBytes []byte
 	)
-	value.Weight = weight
-	value.Expires = expires
+	value.Weight = node.Weight
+	value.Expires = node.Expires
 	valueBytes, err = value.MarshalJSON()
 	if err != nil {
 		log.Err(err).Caller().Send()

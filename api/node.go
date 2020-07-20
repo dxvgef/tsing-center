@@ -4,6 +4,7 @@ import (
 	"math"
 	"strconv"
 	"strings"
+	"time"
 
 	"local/engine"
 	"local/global"
@@ -23,6 +24,7 @@ func (self *Node) Add(ctx *tsing.Context) error {
 			ip        string
 			port      uint16
 			weight    int
+			ttl       uint
 			expires   int64
 		}
 	)
@@ -31,7 +33,7 @@ func (self *Node) Add(ctx *tsing.Context) error {
 		filter.String(ctx.Post("ip"), "ip").Require().IsIP().Set(&req.ip),
 		filter.String(ctx.Post("port"), "port").Require().IsDigit().MinInteger(1).MaxInteger(math.MaxUint16).Set(&req.port),
 		filter.String(ctx.Post("weight"), "weight").Require().MinInteger(0).MaxInteger(math.MaxUint16).Set(&req.weight),
-		filter.String(ctx.Post("expires"), "expires").MinInteger(0).IsDigit().Set(&req.expires),
+		filter.String(ctx.Post("ttl"), "ttl").MinInteger(0).IsDigit().Set(&req.ttl),
 	); err != nil {
 		// 来自客户端的数据，无需记录日志
 		resp["error"] = err.Error()
@@ -54,7 +56,17 @@ func (self *Node) Add(ctx *tsing.Context) error {
 		return JSON(ctx, 400, &resp)
 	}
 
-	if err = global.Storage.SaveNode(req.serviceID, req.ip, req.port, req.weight, req.expires); err != nil {
+	if req.ttl > 0 {
+		req.expires = time.Now().Add(time.Duration(req.ttl) * time.Second).Unix()
+	}
+
+	if err = global.Storage.SaveNode(req.serviceID, global.Node{
+		IP:      req.ip,
+		Port:    req.port,
+		Weight:  req.weight,
+		TTL:     req.ttl,
+		Expires: req.expires,
+	}); err != nil {
 		return ctx.Caller(err)
 	}
 
@@ -71,6 +83,7 @@ func (self *Node) Put(ctx *tsing.Context) error {
 			ip        string
 			port      uint16
 			weight    int
+			ttl       uint
 			expires   int64
 		}
 		port uint64
@@ -79,7 +92,7 @@ func (self *Node) Put(ctx *tsing.Context) error {
 		filter.String(ctx.PathParams.Value("serviceID"), "serviceID").Require().Base64RawURLDecode().Set(&req.serviceID),
 		filter.String(ctx.PathParams.Value("node"), "node").Require().Base64RawURLDecode().Set(&req.node),
 		filter.String(ctx.Post("weight"), "weight").Require().MinInteger(0).MaxInteger(math.MaxUint16).Set(&req.weight),
-		filter.String(ctx.Post("expires"), "expires").MinInteger(0).IsDigit().Set(&req.expires),
+		filter.String(ctx.Post("ttl"), "ttl").MinInteger(0).IsDigit().Set(&req.ttl),
 	); err != nil {
 		// 来自客户端的数据，无需记录日志
 		resp["error"] = err.Error()
@@ -103,7 +116,18 @@ func (self *Node) Put(ctx *tsing.Context) error {
 		resp["error"] = "服务不存在"
 		return JSON(ctx, 400, &resp)
 	}
-	if err = global.Storage.SaveNode(req.serviceID, req.ip, req.port, req.weight, req.expires); err != nil {
+
+	if req.ttl > 0 {
+		req.expires = time.Now().Add(time.Duration(req.ttl) * time.Second).Unix()
+	}
+
+	if err = global.Storage.SaveNode(req.serviceID, global.Node{
+		IP:      req.ip,
+		Port:    req.port,
+		Weight:  req.weight,
+		TTL:     req.ttl,
+		Expires: req.expires,
+	}); err != nil {
 		return ctx.Caller(err)
 	}
 
@@ -161,6 +185,7 @@ func (self *Node) Patch(ctx *tsing.Context) error {
 			ip        string
 			port      uint16
 			attrs     []string
+			expires   int64
 		}
 		port64 uint64
 	)
@@ -169,7 +194,7 @@ func (self *Node) Patch(ctx *tsing.Context) error {
 	if err = filter.Batch(
 		filter.String(ctx.PathParams.Value("serviceID"), "serviceID").Require().Base64RawURLDecode().Set(&req.serviceID),
 		filter.String(ctx.PathParams.Value("node"), "node").Require().Base64RawURLDecode().Set(&req.node),
-		filter.String(ctx.PathParams.Value("attrs"), "attrs").Require().EnumSliceString(",", []string{"expires", "weight"}).SetSlice(&req.attrs, ","),
+		filter.String(ctx.PathParams.Value("attrs"), "attrs").Require().EnumSliceString(",", []string{"ttl", "weight"}).SetSlice(&req.attrs, ","),
 	); err != nil {
 		// 来自客户端的数据，无需记录日志
 		resp["error"] = err.Error()
@@ -213,24 +238,32 @@ func (self *Node) Patch(ctx *tsing.Context) error {
 				return JSON(ctx, 400, &resp)
 			}
 		}
-		if req.attrs[k] == "expires" {
-			if _, exist := ctx.PostParam("expires"); !exist {
-				resp["error"] = "expires值不能为空"
+		if req.attrs[k] == "ttl" {
+			if _, exist := ctx.PostParam("ttl"); !exist {
+				resp["error"] = "ttl值无效"
 				return JSON(ctx, 400, &resp)
 			}
-			node.Expires, err = filter.String(ctx.Post("expires"), "expires").Require().IsDigit().MinInteger(0).Int64()
+			node.TTL, err = filter.String(ctx.Post("ttl"), "ttl").Require().IsDigit().MinInteger(0).Uint()
 			if err != nil {
 				resp["error"] = err.Error()
 				return JSON(ctx, 400, &resp)
 			}
+			if node.TTL != 0 {
+				node.Expires = time.Now().Add(time.Duration(node.TTL) * time.Second).Unix()
+			} else {
+				node.Expires = 0
+			}
 		}
 	}
 
-	// 更新本地内存数据
-	ci.Set(node.IP, node.Port, node.Weight, node.Expires)
-
 	// 更新存储引擎中的数据
-	if err = global.Storage.SaveNode(req.serviceID, node.IP, node.Port, node.Weight, node.Expires); err != nil {
+	if err = global.Storage.SaveNode(req.serviceID, global.Node{
+		IP:      node.IP,
+		Port:    node.Port,
+		Weight:  node.Weight,
+		TTL:     node.TTL,
+		Expires: node.Expires,
+	}); err != nil {
 		return ctx.Caller(err)
 	}
 
@@ -247,7 +280,7 @@ func (self *Node) Touch(ctx *tsing.Context) error {
 			node      string
 			ip        string
 			port      uint16
-			expires   int64
+			ttl       uint
 		}
 		port64 uint64
 	)
@@ -256,7 +289,6 @@ func (self *Node) Touch(ctx *tsing.Context) error {
 	if err = filter.Batch(
 		filter.String(ctx.PathParams.Value("serviceID"), "serviceID").Require().Base64RawURLDecode().Set(&req.serviceID),
 		filter.String(ctx.PathParams.Value("node"), "node").Require().Base64RawURLDecode().Set(&req.node),
-		filter.String(ctx.Post("expires"), "expires").Require().IsDigit().MinInteger(0).Set(&req.expires),
 	); err != nil {
 		// 来自客户端的数据，无需记录日志
 		resp["error"] = err.Error()
@@ -288,11 +320,19 @@ func (self *Node) Touch(ctx *tsing.Context) error {
 		return Status(ctx, 404)
 	}
 
-	// 更新本地内存数据
-	ci.Set(req.ip, req.port, node.Weight, req.expires)
+	if node.TTL == 0 {
+		return Status(ctx, 204)
+	}
 
 	// 更新存储引擎中的数据
-	if err = global.Storage.SaveNode(req.serviceID, node.IP, node.Port, node.Weight, req.expires); err != nil {
+	expires := time.Now().Add(time.Duration(req.ttl) * time.Second).Unix()
+	if err = global.Storage.SaveNode(req.serviceID, global.Node{
+		IP:      node.IP,
+		Port:    node.Port,
+		Weight:  node.Weight,
+		TTL:     node.TTL,
+		Expires: expires,
+	}); err != nil {
 		return ctx.Caller(err)
 	}
 

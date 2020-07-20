@@ -4,6 +4,7 @@ package etcd
 
 import (
 	json "encoding/json"
+
 	easyjson "github.com/mailru/easyjson"
 	jlexer "github.com/mailru/easyjson/jlexer"
 	jwriter "github.com/mailru/easyjson/jwriter"
@@ -17,7 +18,7 @@ var (
 	_ easyjson.Marshaler
 )
 
-func easyjsonCdfae1c8DecodeLocalStorageEtcd(in *jlexer.Lexer, out *NodeValue) {
+func easyjsonCdfae1c8DecodeLocalStorageEtcd(in *jlexer.Lexer, out *NodeData) {
 	isTopLevel := in.IsStart()
 	if in.IsNull() {
 		if isTopLevel {
@@ -50,7 +51,7 @@ func easyjsonCdfae1c8DecodeLocalStorageEtcd(in *jlexer.Lexer, out *NodeValue) {
 		in.Consumed()
 	}
 }
-func easyjsonCdfae1c8EncodeLocalStorageEtcd(out *jwriter.Writer, in NodeValue) {
+func easyjsonCdfae1c8EncodeLocalStorageEtcd(out *jwriter.Writer, in NodeData) {
 	out.RawByte('{')
 	first := true
 	_ = first
@@ -74,25 +75,25 @@ func easyjsonCdfae1c8EncodeLocalStorageEtcd(out *jwriter.Writer, in NodeValue) {
 }
 
 // MarshalJSON supports json.Marshaler interface
-func (v NodeValue) MarshalJSON() ([]byte, error) {
+func (v NodeData) MarshalJSON() ([]byte, error) {
 	w := jwriter.Writer{}
 	easyjsonCdfae1c8EncodeLocalStorageEtcd(&w, v)
 	return w.Buffer.BuildBytes(), w.Error
 }
 
 // MarshalEasyJSON supports easyjson.Marshaler interface
-func (v NodeValue) MarshalEasyJSON(w *jwriter.Writer) {
+func (v NodeData) MarshalEasyJSON(w *jwriter.Writer) {
 	easyjsonCdfae1c8EncodeLocalStorageEtcd(w, v)
 }
 
 // UnmarshalJSON supports json.Unmarshaler interface
-func (v *NodeValue) UnmarshalJSON(data []byte) error {
+func (v *NodeData) UnmarshalJSON(data []byte) error {
 	r := jlexer.Lexer{Data: data}
 	easyjsonCdfae1c8DecodeLocalStorageEtcd(&r, v)
 	return r.Error()
 }
 
 // UnmarshalEasyJSON supports easyjson.Unmarshaler interface
-func (v *NodeValue) UnmarshalEasyJSON(l *jlexer.Lexer) {
+func (v *NodeData) UnmarshalEasyJSON(l *jlexer.Lexer) {
 	easyjsonCdfae1c8DecodeLocalStorageEtcd(l, v)
 }

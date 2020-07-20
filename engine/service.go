@@ -45,7 +45,13 @@ func SetService(config global.ServiceConfig) (err error) {
 	}
 	// 将缓存中的节点写入到新的集群实例中
 	for k := range nodes {
-		newCluster.Set(nodes[k].IP, nodes[k].Port, nodes[k].Weight, nodes[k].Expires)
+		newCluster.Set(global.Node{
+			IP:      nodes[k].IP,
+			Port:    nodes[k].Port,
+			Weight:  nodes[k].Weight,
+			TTL:     nodes[k].TTL,
+			Expires: nodes[k].Expires,
+		})
 	}
 	// 替换旧的集群实例
 	global.Services.Store(config.ServiceID, newCluster)

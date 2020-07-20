@@ -22,8 +22,9 @@ type Cluster struct {
 type Node struct {
 	ip      string // 地址
 	port    uint16 // 端口
-	expires int64  // 生命周期截止时间(unix时间戳)
-	weight  int    // 权重值
+	ttl     uint
+	expires int64 // 生命周期截止时间(unix时间戳)
+	weight  int   // 权重值
 }
 
 func New(config global.ServiceConfig) *Cluster {
@@ -44,6 +45,7 @@ func (self *Cluster) Find(ip string, port uint16) (node global.Node) {
 		if self.nodes[k].ip == ip && self.nodes[k].port == port {
 			node.IP = ip
 			node.Port = port
+			node.TTL = self.nodes[k].ttl
 			node.Expires = self.nodes[k].expires
 			node.Weight = self.nodes[k].weight
 			return
@@ -54,29 +56,39 @@ func (self *Cluster) Find(ip string, port uint16) (node global.Node) {
 
 // 设置节点
 // 当weight的值<0，表示不更新该属性
-func (self *Cluster) Set(ip string, port uint16, weight int, expires int64) {
+func (self *Cluster) Set(node global.Node) {
 	for k := range self.nodes {
-		if self.nodes[k].ip == ip && self.nodes[k].port == port {
-			if expires >= 0 && self.nodes[k].expires != expires {
-				self.nodes[k].expires = expires
-			}
-			if self.nodes[k].weight >= 0 && self.nodes[k].weight != weight {
-				self.nodes[k].weight = weight
-				self.calcMaxWeight(weight)
+		if self.nodes[k].ip == node.IP && self.nodes[k].port == node.Port {
+			self.nodes[k].ttl = node.TTL
+			self.nodes[k].expires = node.Expires
+			if self.nodes[k].weight >= 0 && self.nodes[k].weight != node.Weight {
+				self.nodes[k].weight = node.Weight
+				self.calcMaxWeight(node.Weight)
 				self.calcAllGCD(self.total)
 			}
 			return
 		}
 	}
 	self.nodes = append(self.nodes, Node{
-		ip:      ip,
-		port:    port,
-		weight:  weight,
-		expires: expires,
+		ip:      node.IP,
+		port:    node.Port,
+		weight:  node.Weight,
+		ttl:     node.TTL,
+		expires: node.Expires,
 	})
 	self.total++
-	self.calcMaxWeight(weight)
+	self.calcMaxWeight(node.Weight)
 	self.calcAllGCD(self.total)
+}
+
+// 触活节点
+func (self *Cluster) Touch(ip string, port uint16, expires int64) {
+	for k := range self.nodes {
+		if self.nodes[k].ip == ip && self.nodes[k].port == port && self.nodes[k].ttl > 0 {
+			self.nodes[k].expires = expires
+			return
+		}
+	}
 }
 
 // 获得节点总数
@@ -99,7 +111,7 @@ func (self *Cluster) Remove(ip string, port uint16) {
 }
 
 // 选举节点
-func (self *Cluster) Select() (ip string, port uint16, expires int64) {
+func (self *Cluster) Select() (node global.Node) {
 	var lostNodes []global.Node
 	defer func() {
 		if len(lostNodes) > 0 {
@@ -125,9 +137,10 @@ func (self *Cluster) Select() (ip string, port uint16, expires int64) {
 			})
 			return
 		}
-		ip = self.nodes[0].ip
-		port = self.nodes[0].port
-		expires = self.nodes[0].expires
+		node.IP = self.nodes[0].ip
+		node.Port = self.nodes[0].port
+		node.TTL = self.nodes[0].ttl
+		node.Expires = self.nodes[0].expires
 		return
 	}
 
@@ -166,9 +179,10 @@ func (self *Cluster) Select() (ip string, port uint16, expires int64) {
 		}
 		cw = self.currentWeight
 		if self.nodes[last].weight >= cw {
-			ip = self.nodes[last].ip
-			port = self.nodes[last].port
-			expires = self.nodes[last].expires
+			node.IP = self.nodes[last].ip
+			node.Port = self.nodes[last].port
+			node.TTL = self.nodes[last].ttl
+			node.Expires = self.nodes[last].expires
 			break
 		}
 	}
@@ -187,6 +201,7 @@ func (self *Cluster) Nodes() []global.Node {
 		nodes[k].IP = self.nodes[k].ip
 		nodes[k].Port = self.nodes[k].port
 		nodes[k].Weight = self.nodes[k].weight
+		nodes[k].TTL = self.nodes[k].ttl
 		nodes[k].Expires = self.nodes[k].expires
 	}
 	return nodes

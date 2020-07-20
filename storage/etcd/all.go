@@ -78,7 +78,13 @@ func (self *Etcd) SaveAll() (err error) {
 		}
 		nodes := ci.Nodes()
 		for k := range nodes {
-			if err = self.SaveNode(ci.Config().ServiceID, nodes[k].IP, nodes[k].Port, nodes[k].Weight, nodes[k].Expires); err != nil {
+			if err = self.SaveNode(ci.Config().ServiceID, global.Node{
+				IP:      nodes[k].IP,
+				Port:    nodes[k].Port,
+				Weight:  nodes[k].Weight,
+				TTL:     nodes[k].TTL,
+				Expires: nodes[k].Expires,
+			}); err != nil {
 				log.Err(err).Caller().Send()
 				return false
 			}

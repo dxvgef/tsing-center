@@ -19,8 +19,7 @@ func Build(name, config string) (global.StorageType, error) {
 			log.Err(err).Caller().Send()
 			return nil, err
 		}
-		// global.StorageKeyPrefix = sa.KeyPrefix
 		return sa, nil
 	}
-	return nil, errors.New("设置了不支持的存储器")
+	return nil, errors.New("不支持的存储器")
 }
