@@ -106,7 +106,7 @@ func (self *Service) Select(ctx *tsing.Context) error {
 		return JSON(ctx, 400, &resp)
 	}
 	node := ci.Select()
-	if resp["ip"] == "" {
+	if node.IP == "" {
 		return Status(ctx, http.StatusNotImplemented)
 	}
 	return JSON(ctx, 200, &node)
