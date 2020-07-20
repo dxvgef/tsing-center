@@ -156,16 +156,13 @@ func (self *Cluster) Select() (node global.Node) {
 	case 0:
 		return
 	case 1:
-		log.Debug().Caller().Interface("nodes", self.nodes).Msg("只有一个节点")
 		if self.nodes[0].weight < 0 || (self.nodes[0].ttl > 0 && self.nodes[0].expires <= now) {
-			log.Debug().Caller().Msg("遇到了无效节点")
 			lostNodes = append(lostNodes, global.Node{
 				IP:   self.nodes[0].ip,
 				Port: self.nodes[0].port,
 			})
 			return
 		}
-		log.Debug().Caller().Interface("nodes", self.nodes).Msg("命中唯一的节点")
 		node.IP = self.nodes[0].ip
 		node.Port = self.nodes[0].port
 		node.TTL = self.nodes[0].ttl
