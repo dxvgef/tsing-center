@@ -74,6 +74,7 @@ func (self *Etcd) SaveNode(serviceID string, node global.Node) (err error) {
 		valueBytes []byte
 	)
 	value.Weight = node.Weight
+	value.TTL = node.TTL
 	value.Expires = node.Expires
 	value.Meta = node.Mete
 	valueBytes, err = value.MarshalJSON()
