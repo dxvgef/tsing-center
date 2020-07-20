@@ -147,10 +147,10 @@ func (self *Node) Delete(ctx *tsing.Context) error {
 		req  struct {
 			serviceID string
 			node      string
-			ip        string
-			port      uint16
 		}
-		port uint64
+		ip     string
+		port   uint16
+		port64 uint64
 	)
 	if err = filter.Batch(
 		filter.String(ctx.PathParams.Value("serviceID"), "serviceID").Require().Base64RawURLDecode().Set(&req.serviceID),
@@ -165,15 +165,15 @@ func (self *Node) Delete(ctx *tsing.Context) error {
 		// 来自客户端的数据，无需记录日志
 		return Status(ctx, 404)
 	}
-	req.ip = req.node[0:pos]
-	port, err = strconv.ParseUint(req.node[pos:], 10, 16)
+	ip = req.node[0:pos]
+	port64, err = strconv.ParseUint(req.node[pos+1:], 10, 16)
 	if err != nil {
 		// 来自客户端的数据，无需记录日志
 		return Status(ctx, 404)
 	}
-	req.port = uint16(port)
+	port = uint16(port64)
 
-	err = global.Storage.DeleteStorageNode(req.serviceID, req.ip, req.port)
+	err = global.Storage.DeleteStorageNode(req.serviceID, ip, port)
 	if err != nil {
 		return ctx.Caller(err)
 	}

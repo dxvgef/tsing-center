@@ -16,9 +16,10 @@ import (
 
 // 节点数据
 type NodeData struct {
-	TTL     uint  `json:"ttl,omitempty"`     // 生命周期(秒)
-	Expires int64 `json:"expires,omitempty"` // 生命周期截止时间(unix时间戳)
-	Weight  int   `json:"weight,omitempty"`  // 权重值
+	TTL     uint   `json:"ttl,omitempty"`     // 生命周期(秒)
+	Expires int64  `json:"expires,omitempty"` // 生命周期截止时间(unix时间戳)
+	Weight  int    `json:"weight,omitempty"`  // 权重值
+	Meta    string `json:"meta,omitempty"`
 }
 
 // 从存储器加载节点到本地，如果不存在则创建
@@ -49,6 +50,7 @@ func (self *Etcd) LoadNode(key string, data []byte) error {
 		TTL:     value.TTL,
 		Weight:  value.Weight,
 		Expires: value.Expires,
+		Mete:    value.Meta,
 	})
 }
 
@@ -73,6 +75,7 @@ func (self *Etcd) SaveNode(serviceID string, node global.Node) (err error) {
 	)
 	value.Weight = node.Weight
 	value.Expires = node.Expires
+	value.Meta = node.Mete
 	valueBytes, err = value.MarshalJSON()
 	if err != nil {
 		log.Err(err).Caller().Send()
