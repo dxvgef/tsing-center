@@ -1,6 +1,7 @@
 package wrr
 
 import (
+	"local/global"
 	"log"
 	"strconv"
 	"testing"
@@ -23,7 +24,12 @@ func TestNext(t *testing.T) {
 			port = 80
 			weight = 1
 		}
-		obj.Set(ip, port, weight, 0)
+		obj.Set(global.Node{
+			IP:     ip,
+			Port:   port,
+			Weight: weight,
+			TTL:    60,
+		})
 		log.Println(ip, port, weight)
 	}
 
