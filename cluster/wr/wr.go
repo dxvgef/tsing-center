@@ -24,6 +24,7 @@ type Node struct {
 	ttl     uint
 	expires int64 // 生命周期截止时间(unix时间戳)
 	weight  int   // 权重值
+	meta    string
 }
 
 func New(config global.ServiceConfig) *Cluster {
@@ -46,6 +47,7 @@ func (self *Cluster) Find(ip string, port uint16) (node global.Node) {
 			node.TTL = self.nodes[k].ttl
 			node.Expires = self.nodes[k].expires
 			node.Weight = self.nodes[k].weight
+			node.Mete = self.nodes[k].meta
 			return
 		}
 	}
@@ -65,6 +67,7 @@ func (self *Cluster) Set(node global.Node) {
 				self.updateTotalWeight(node.Weight)
 				self.resetRand()
 			}
+			self.nodes[k].meta = node.Mete
 			return
 		}
 	}
@@ -76,6 +79,7 @@ func (self *Cluster) Set(node global.Node) {
 		weight:  node.Weight,
 		ttl:     node.TTL,
 		expires: node.Expires,
+		meta:    node.Mete,
 	})
 	self.updateTotalWeight(node.Weight)
 	self.resetRand()
@@ -144,6 +148,7 @@ func (self *Cluster) Select() (node global.Node) {
 		node.Port = self.nodes[0].port
 		node.TTL = self.nodes[0].ttl
 		node.Expires = self.nodes[0].expires
+		node.Mete = self.nodes[0].meta
 		return
 	}
 	if self.rand == nil {
@@ -172,6 +177,7 @@ func (self *Cluster) Select() (node global.Node) {
 			node.Port = self.nodes[i].port
 			node.TTL = self.nodes[i].ttl
 			node.Expires = self.nodes[i].expires
+			node.Mete = self.nodes[i].meta
 			break
 		}
 	}
@@ -192,6 +198,7 @@ func (self *Cluster) Nodes() []global.Node {
 		nodes[k].TTL = self.nodes[k].ttl
 		nodes[k].Weight = self.nodes[k].weight
 		nodes[k].Expires = self.nodes[k].expires
+		nodes[k].Mete = self.nodes[k].meta
 	}
 	return nodes
 }

@@ -21,6 +21,7 @@ type Node struct {
 	ttl             uint
 	expires         int64 // 生命周期截止时间(unix时间戳)
 	weight          int
+	meta            string
 	currentWeight   int
 	effectiveWeight int
 }
@@ -53,6 +54,7 @@ func (self *Cluster) Find(ip string, port uint16) (node global.Node) {
 			node.TTL = self.nodes[k].ttl
 			node.Expires = self.nodes[k].expires
 			node.Weight = self.nodes[k].weight
+			node.Mete = self.nodes[k].meta
 			return
 		}
 	}
@@ -71,6 +73,7 @@ func (self *Cluster) Set(node global.Node) {
 				self.nodes[k].weight = node.Weight
 				self.reset()
 			}
+			self.nodes[k].meta = node.Mete
 			return
 		}
 	}
@@ -82,6 +85,7 @@ func (self *Cluster) Set(node global.Node) {
 		weight:  node.Weight,
 		ttl:     node.TTL,
 		expires: node.Expires,
+		meta:    node.Mete,
 	})
 	self.reset()
 	self.total++
@@ -127,6 +131,7 @@ func (self *Cluster) Nodes() []global.Node {
 		nodes[k].Port = self.nodes[k].port
 		nodes[k].Weight = self.nodes[k].weight
 		nodes[k].Expires = self.nodes[k].expires
+		nodes[k].Mete = self.nodes[k].meta
 	}
 	return nodes
 }
@@ -162,6 +167,7 @@ func (self *Cluster) Select() (node global.Node) {
 		node.Port = self.nodes[0].port
 		node.TTL = self.nodes[0].ttl
 		node.Expires = self.nodes[0].expires
+		node.Mete = self.nodes[0].meta
 		return
 	}
 	var target *Node
@@ -192,6 +198,7 @@ func (self *Cluster) Select() (node global.Node) {
 			node.Port = self.nodes[i].port
 			node.TTL = self.nodes[i].ttl
 			node.Expires = self.nodes[i].expires
+			node.Mete = self.nodes[i].meta
 		}
 	}
 	if target == nil {
