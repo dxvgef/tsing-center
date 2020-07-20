@@ -37,6 +37,12 @@ func (self *Node) Add(ctx *tsing.Context) error {
 		resp["error"] = err.Error()
 		return JSON(ctx, 400, &resp)
 	}
+
+	// 自动获取节点IP
+	if req.ip == "" {
+		req.ip = ctx.Request.RemoteAddr[:strings.Index(ctx.Request.RemoteAddr, ":")]
+	}
+
 	ci := engine.FindCluster(req.serviceID)
 	if ci == nil {
 		resp["error"] = "服务不存在"
