@@ -129,6 +129,7 @@ func (self *Cluster) Nodes() []global.Node {
 		nodes[k].IP = self.nodes[k].ip
 		nodes[k].Port = self.nodes[k].port
 		nodes[k].Weight = self.nodes[k].weight
+		nodes[k].TTL = self.nodes[k].ttl
 		nodes[k].Expires = self.nodes[k].expires
 		nodes[k].Mete = self.nodes[k].meta
 	}
