@@ -102,6 +102,19 @@ func (self *Cluster) Remove(ip string, port uint16) {
 
 // 选举出下一个命中的节点
 func (self *Cluster) Select() (ip string, port uint16, expires int64) {
+	var lostNodes []global.Node
+
+	defer func() {
+		if len(lostNodes) > 0 {
+			go func() {
+				if err := global.Storage.Clean(self.config.ServiceID, lostNodes); err != nil {
+					log.Err(err).Caller().Send()
+					return
+				}
+			}()
+		}
+	}()
+
 	now := time.Now().Unix()
 
 	switch self.total {
@@ -109,6 +122,10 @@ func (self *Cluster) Select() (ip string, port uint16, expires int64) {
 		return
 	case 1:
 		if self.nodes[0].weight < 0 || (self.nodes[0].expires > 0 && self.nodes[0].expires <= now) {
+			lostNodes = append(lostNodes, global.Node{
+				IP:   self.nodes[0].ip,
+				Port: self.nodes[0].port,
+			})
 			return
 		}
 		ip = self.nodes[0].ip
@@ -119,37 +136,32 @@ func (self *Cluster) Select() (ip string, port uint16, expires int64) {
 	if self.rand == nil {
 		self.rand = rand.New(rand.NewSource(time.Now().UnixNano()))
 	}
-	var (
-		lostNodes    []global.Node
-		randomWeight = self.rand.Intn(self.totalWeight)
-	)
-	for k := range self.nodes {
-		if self.nodes[k].weight == 0 {
-			continue
-		}
-		if self.nodes[k].expires > 0 && self.nodes[k].expires <= now {
+	var randomWeight = self.rand.Intn(self.totalWeight)
+
+	for i := range self.nodes {
+		if self.nodes[i].weight == 0 {
 			lostNodes = append(lostNodes, global.Node{
-				IP:   self.nodes[k].ip,
-				Port: self.nodes[k].port,
+				IP:   self.nodes[i].ip,
+				Port: self.nodes[i].port,
 			})
 			continue
 		}
-		randomWeight = randomWeight - self.nodes[k].weight
+		if self.nodes[i].expires > 0 && self.nodes[i].expires <= now {
+			lostNodes = append(lostNodes, global.Node{
+				IP:   self.nodes[i].ip,
+				Port: self.nodes[i].port,
+			})
+			continue
+		}
+		randomWeight = randomWeight - self.nodes[i].weight
 		if randomWeight <= 0 {
-			ip = self.nodes[k].ip
-			port = self.nodes[k].port
-			expires = self.nodes[k].expires
+			ip = self.nodes[i].ip
+			port = self.nodes[i].port
+			expires = self.nodes[i].expires
 			break
 		}
 	}
-	if len(lostNodes) > 0 {
-		go func() {
-			if err := global.Storage.Clean(self.config.ServiceID, lostNodes); err != nil {
-				log.Err(err).Caller().Send()
-				return
-			}
-		}()
-	}
+
 	return
 }
 

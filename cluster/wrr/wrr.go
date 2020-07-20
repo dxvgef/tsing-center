@@ -3,9 +3,9 @@ package wrr
 import (
 	"time"
 
-	"github.com/rs/zerolog/log"
-
 	"local/global"
+
+	"github.com/rs/zerolog/log"
 )
 
 // 加权轮循(与LVS类似)算法的集群
@@ -100,6 +100,18 @@ func (self *Cluster) Remove(ip string, port uint16) {
 
 // 选举节点
 func (self *Cluster) Select() (ip string, port uint16, expires int64) {
+	var lostNodes []global.Node
+	defer func() {
+		if len(lostNodes) > 0 {
+			go func() {
+				if err := global.Storage.Clean(self.config.ServiceID, lostNodes); err != nil {
+					log.Err(err).Caller().Send()
+					return
+				}
+			}()
+		}
+	}()
+
 	now := time.Now().Unix()
 
 	switch self.total {
@@ -107,6 +119,10 @@ func (self *Cluster) Select() (ip string, port uint16, expires int64) {
 		return
 	case 1:
 		if self.nodes[0].weight < 0 || (self.nodes[0].expires > 0 && self.nodes[0].expires <= now) {
+			lostNodes = append(lostNodes, global.Node{
+				IP:   self.nodes[0].ip,
+				Port: self.nodes[0].port,
+			})
 			return
 		}
 		ip = self.nodes[0].ip
@@ -115,10 +131,7 @@ func (self *Cluster) Select() (ip string, port uint16, expires int64) {
 		return
 	}
 
-	var (
-		cw, gcd, last, total int
-		lostNodes            []global.Node
-	)
+	var cw, gcd, last, total int
 	for {
 		last = self.lastIndex
 		total = self.total
@@ -138,6 +151,10 @@ func (self *Cluster) Select() (ip string, port uint16, expires int64) {
 			}
 		}
 		if self.nodes[last].weight == 0 {
+			lostNodes = append(lostNodes, global.Node{
+				IP:   self.nodes[last].ip,
+				Port: self.nodes[last].port,
+			})
 			continue
 		}
 		if self.nodes[last].expires > 0 && self.nodes[last].expires <= now {
@@ -155,14 +172,7 @@ func (self *Cluster) Select() (ip string, port uint16, expires int64) {
 			break
 		}
 	}
-	if len(lostNodes) > 0 {
-		go func() {
-			if err := global.Storage.Clean(self.config.ServiceID, lostNodes); err != nil {
-				log.Err(err).Caller().Send()
-				return
-			}
-		}()
-	}
+
 	return
 }
 
