@@ -15,21 +15,21 @@ POST http://localhost:20080/services/
 Content-Type: application/x-www-form-urlencoded
 SECRET: 123456
 
-id=test_service&load_balance=SWRR
+id=demo&load_balance=SWRR&meta={"secret":"123456"}
 
-### 替换或创建服务
-PUT http://localhost:20080/services/dGVzdF9zZXJ2aWNl
+### 重写或创建服务
+PUT http://localhost:20080/services/ZGVtbw
 Content-Type: application/x-www-form-urlencoded
 SECRET: 123456
 
-load_balance=SWRR
+load_balance=SWRR&meta={"secret":"abcdef"}
 
 ### 删除服务
-DELETE http://localhost:20080/services/dGVzdF9zZXJ2aWNl
+DELETE http://localhost:20080/services/ZGVtbw
 SECRET: 123456
 
 ### 从服务中获取节点
-GET http://localhost:20080/services/dGVzdF9zZXJ2aWNl/select
+GET http://127.0.0.1:20080/services/ZGVtbw/select
 SECRET: 123456
 
 ### 添加节点
@@ -37,14 +37,14 @@ POST http://localhost:20080/nodes/
 Content-Type: application/x-www-form-urlencoded
 SECRET: 123456
 
-service_id=test_service&ip=127.0.0.1&port=30080&weight=1
+service_id=demo&ip=127.0.0.1&port=20180&weight=1&meta={"os": "windows"}
 
-### 替换或创建节点
-PUT http://localhost:20080/nodes/dGVzdF9zZXJ2aWNl/MTI3LjAuMC4xOjMwMDgw
+### 重写或创建节点
+PUT http://localhost:20080/nodes/ZGVtbw/MTI3LjAuMC4xOjIwMTgw
 Content-Type: application/x-www-form-urlencoded
 SECRET: 123456
 
-weight=1
+weight=2&meta={"os": "linux"}
 
 ### 更新节点的属性
 PATCH http://localhost:20080/nodes/dGVzdF9zZXJ2aWNl/MTI3LjAuMC4xOjMwMDgw
@@ -54,5 +54,5 @@ SECRET: 123456
 weight=1&expires=0
 
 ### 删除节点
-DELETE http://localhost:20080/nodes/dGVzdF9zZXJ2aWNl/MTI3LjAuMC4xOjMwMDgw
+DELETE http://localhost:20080/nodes/ZGVtbw/MTI3LjAuMC4xOjIwMTgw
 SECRET: 123456
