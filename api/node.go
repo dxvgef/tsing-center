@@ -26,6 +26,7 @@ func (self *Node) Add(ctx *tsing.Context) error {
 			weight    int
 			ttl       uint
 			expires   int64
+			meta      string
 		}
 	)
 	if err = filter.Batch(
@@ -34,6 +35,7 @@ func (self *Node) Add(ctx *tsing.Context) error {
 		filter.String(ctx.Post("port"), "port").Require().IsDigit().MinInteger(1).MaxInteger(math.MaxUint16).Set(&req.port),
 		filter.String(ctx.Post("weight"), "weight").Require().MinInteger(0).MaxInteger(math.MaxUint16).Set(&req.weight),
 		filter.String(ctx.Post("ttl"), "ttl").MinInteger(0).IsDigit().Set(&req.ttl),
+		filter.String(ctx.Post("meta"), "meta").IsJSON().Set(&req.meta),
 	); err != nil {
 		// 来自客户端的数据，无需记录日志
 		resp["error"] = err.Error()
@@ -66,6 +68,7 @@ func (self *Node) Add(ctx *tsing.Context) error {
 		Weight:  req.weight,
 		TTL:     req.ttl,
 		Expires: req.expires,
+		Mete:    req.meta,
 	}); err != nil {
 		return ctx.Caller(err)
 	}
@@ -85,6 +88,7 @@ func (self *Node) Put(ctx *tsing.Context) error {
 			weight    int
 			ttl       uint
 			expires   int64
+			meta      string
 		}
 		port uint64
 	)
@@ -93,6 +97,7 @@ func (self *Node) Put(ctx *tsing.Context) error {
 		filter.String(ctx.PathParams.Value("node"), "node").Require().Base64RawURLDecode().Set(&req.node),
 		filter.String(ctx.Post("weight"), "weight").Require().MinInteger(0).MaxInteger(math.MaxUint16).Set(&req.weight),
 		filter.String(ctx.Post("ttl"), "ttl").MinInteger(0).IsDigit().Set(&req.ttl),
+		filter.String(ctx.Post("meta"), "meta").IsJSON().Set(&req.meta),
 	); err != nil {
 		// 来自客户端的数据，无需记录日志
 		resp["error"] = err.Error()
@@ -127,6 +132,7 @@ func (self *Node) Put(ctx *tsing.Context) error {
 		Weight:  req.weight,
 		TTL:     req.ttl,
 		Expires: req.expires,
+		Mete:    req.meta,
 	}); err != nil {
 		return ctx.Caller(err)
 	}
@@ -186,6 +192,7 @@ func (self *Node) Patch(ctx *tsing.Context) error {
 			port      uint16
 			attrs     []string
 			expires   int64
+			meta      string
 		}
 		port64 uint64
 	)
@@ -194,7 +201,7 @@ func (self *Node) Patch(ctx *tsing.Context) error {
 	if err = filter.Batch(
 		filter.String(ctx.PathParams.Value("serviceID"), "serviceID").Require().Base64RawURLDecode().Set(&req.serviceID),
 		filter.String(ctx.PathParams.Value("node"), "node").Require().Base64RawURLDecode().Set(&req.node),
-		filter.String(ctx.PathParams.Value("attrs"), "attrs").Require().EnumSliceString(",", []string{"ttl", "weight"}).SetSlice(&req.attrs, ","),
+		filter.String(ctx.PathParams.Value("attrs"), "attrs").Require().EnumSliceString(",", []string{"ttl", "weight", "meta"}).SetSlice(&req.attrs, ","),
 	); err != nil {
 		// 来自客户端的数据，无需记录日志
 		resp["error"] = err.Error()
@@ -238,6 +245,13 @@ func (self *Node) Patch(ctx *tsing.Context) error {
 				return JSON(ctx, 400, &resp)
 			}
 		}
+		if req.attrs[k] == "meta" {
+			node.Mete, err = filter.String(ctx.Post("weight"), "weight").IsJSON().String()
+			if err != nil {
+				resp["error"] = err.Error()
+				return JSON(ctx, 400, &resp)
+			}
+		}
 		if req.attrs[k] == "ttl" {
 			if _, exist := ctx.PostParam("ttl"); !exist {
 				resp["error"] = "ttl值无效"
@@ -262,6 +276,7 @@ func (self *Node) Patch(ctx *tsing.Context) error {
 		Port:    node.Port,
 		Weight:  node.Weight,
 		TTL:     node.TTL,
+		Mete:    node.Mete,
 		Expires: node.Expires,
 	}); err != nil {
 		return ctx.Caller(err)
@@ -332,6 +347,7 @@ func (self *Node) Touch(ctx *tsing.Context) error {
 		Weight:  node.Weight,
 		TTL:     node.TTL,
 		Expires: expires,
+		Mete:    node.Mete,
 	}); err != nil {
 		return ctx.Caller(err)
 	}
