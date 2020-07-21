@@ -29,6 +29,7 @@
 
 ## 相关资源
 
+- [Tsing Center Go](https://github.com/dxvgef/tsing-center-go) Tsing Center的Golang SDK
 - [Tsing](https://github.com/dxvgef/tsing) 高性能、微核心的Go语言HTTP服务框架
 - [Tsing Gateway](https://github.com/dxvgef/tsing-gateway) 开源、跨平台、去中心化集群、动态配置的API网关
 
