@@ -146,6 +146,7 @@ func (self *Cluster) Select() (node global.Node) {
 		}
 		node.IP = self.nodes[0].ip
 		node.Port = self.nodes[0].port
+		node.Weight = self.nodes[0].weight
 		node.TTL = self.nodes[0].ttl
 		node.Expires = self.nodes[0].expires
 		node.Mete = self.nodes[0].meta
@@ -157,14 +158,7 @@ func (self *Cluster) Select() (node global.Node) {
 	var randomWeight = self.rand.Intn(self.totalWeight)
 
 	for i := range self.nodes {
-		if self.nodes[i].weight == 0 {
-			lostNodes = append(lostNodes, global.Node{
-				IP:   self.nodes[i].ip,
-				Port: self.nodes[i].port,
-			})
-			continue
-		}
-		if self.nodes[i].ttl > 0 && self.nodes[i].expires <= now {
+		if self.nodes[i].weight < 0 || (self.nodes[i].ttl > 0 && self.nodes[i].expires <= now) {
 			lostNodes = append(lostNodes, global.Node{
 				IP:   self.nodes[i].ip,
 				Port: self.nodes[i].port,
@@ -175,6 +169,7 @@ func (self *Cluster) Select() (node global.Node) {
 		if randomWeight <= 0 {
 			node.IP = self.nodes[i].ip
 			node.Port = self.nodes[i].port
+			node.Weight = self.nodes[i].weight
 			node.TTL = self.nodes[i].ttl
 			node.Expires = self.nodes[i].expires
 			node.Mete = self.nodes[i].meta

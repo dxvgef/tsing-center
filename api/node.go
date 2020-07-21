@@ -113,7 +113,7 @@ func (self *Node) Put(ctx *tsing.Context) error {
 
 	ci := engine.FindCluster(req.serviceID)
 	if ci == nil {
-		resp["error"] = "服务不存在"
+		resp["error"] = "服务不存在" + req.serviceID
 		return JSON(ctx, 400, &resp)
 	}
 

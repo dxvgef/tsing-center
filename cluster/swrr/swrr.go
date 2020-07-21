@@ -103,13 +103,13 @@ func (self *Cluster) Touch(ip string, port uint16, expires int64) {
 // 移除节点
 func (self *Cluster) Remove(ip string, port uint16) {
 	for k := range self.nodes {
-		if self.nodes[k].ip != ip && self.nodes[k].port != port {
-			continue
+		if self.nodes[k].ip == ip && self.nodes[k].port == port {
+			self.nodes = append(self.nodes[:k], self.nodes[k+1:]...)
+			self.reset()
+			self.total--
+			log.Debug().Caller().Interface("nodes", self.Nodes()).Caller().Send()
+			return
 		}
-		self.nodes = append(self.nodes[:k], self.nodes[k+1:]...)
-		self.reset()
-		self.total--
-		return
 	}
 }
 
@@ -165,6 +165,7 @@ func (self *Cluster) Select() (node global.Node) {
 		}
 		node.IP = self.nodes[0].ip
 		node.Port = self.nodes[0].port
+		node.Weight = self.nodes[0].weight
 		node.TTL = self.nodes[0].ttl
 		node.Expires = self.nodes[0].expires
 		node.Mete = self.nodes[0].meta
@@ -173,14 +174,7 @@ func (self *Cluster) Select() (node global.Node) {
 	var target *Node
 	totalWeight := 0
 	for i := range self.nodes {
-		if self.nodes[i].weight == 0 {
-			lostNodes = append(lostNodes, global.Node{
-				IP:   self.nodes[i].ip,
-				Port: self.nodes[i].port,
-			})
-			continue
-		}
-		if self.nodes[i].ttl > 0 && self.nodes[i].expires <= now {
+		if self.nodes[i].weight < 0 || (self.nodes[i].ttl > 0 && self.nodes[i].expires <= now) {
 			lostNodes = append(lostNodes, global.Node{
 				IP:   self.nodes[i].ip,
 				Port: self.nodes[i].port,
@@ -196,6 +190,7 @@ func (self *Cluster) Select() (node global.Node) {
 			target = &self.nodes[i]
 			node.IP = self.nodes[i].ip
 			node.Port = self.nodes[i].port
+			node.Weight = self.nodes[i].weight
 			node.TTL = self.nodes[i].ttl
 			node.Expires = self.nodes[i].expires
 			node.Mete = self.nodes[i].meta

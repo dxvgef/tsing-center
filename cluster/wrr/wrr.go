@@ -143,6 +143,7 @@ func (self *Cluster) Select() (node global.Node) {
 		}
 		node.IP = self.nodes[0].ip
 		node.Port = self.nodes[0].port
+		node.Weight = self.nodes[0].weight
 		node.TTL = self.nodes[0].ttl
 		node.Expires = self.nodes[0].expires
 		node.Mete = self.nodes[0].meta
@@ -168,14 +169,7 @@ func (self *Cluster) Select() (node global.Node) {
 				}
 			}
 		}
-		if self.nodes[last].weight == 0 {
-			lostNodes = append(lostNodes, global.Node{
-				IP:   self.nodes[last].ip,
-				Port: self.nodes[last].port,
-			})
-			continue
-		}
-		if self.nodes[last].ttl > 0 && self.nodes[last].expires <= now {
+		if self.nodes[last].weight < 0 || (self.nodes[last].ttl > 0 && self.nodes[last].expires <= now) {
 			lostNodes = append(lostNodes, global.Node{
 				IP:   self.nodes[last].ip,
 				Port: self.nodes[last].port,
