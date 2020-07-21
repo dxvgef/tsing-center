@@ -57,6 +57,11 @@ SECRET: 123456
 
 weight=1&ttl=0
 
+### 节点触活
+POST http://localhost:20080/nodes/ZGVtbw/MTI3LjAuMC4xOjIwMTgw
+Content-Type: application/x-www-form-urlencoded
+SECRET: 123456
+
 ### 删除节点
 DELETE http://localhost:20080/nodes/ZGVtbw/MTI3LjAuMC4xOjIwMTgw
 SECRET: 123456
