@@ -51,7 +51,7 @@ func (self *Service) Put(ctx *tsing.Context) error {
 	if err = filter.Batch(
 		filter.String(ctx.PathParams.Value("serviceID"), "serviceID").Require().Base64RawURLDecode().Set(&config.ServiceID),
 		filter.String(ctx.Post("load_balance"), "load_balance").Require().Set(&config.LoadBalance),
-		filter.String(ctx.Post("meta"), "meta").Require().Set(&config.Mete),
+		filter.String(ctx.Post("meta"), "meta").IsJSON().Set(&config.Mete),
 	); err != nil {
 		// 来自客户端的数据，无需记录日志
 		resp["error"] = err.Error()
