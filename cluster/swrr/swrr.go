@@ -107,7 +107,6 @@ func (self *Cluster) Remove(ip string, port uint16) {
 			self.nodes = append(self.nodes[:k], self.nodes[k+1:]...)
 			self.reset()
 			self.total--
-			log.Debug().Caller().Interface("nodes", self.Nodes()).Caller().Send()
 			return
 		}
 	}

@@ -103,14 +103,13 @@ func (self *Cluster) Total() int {
 // 移除节点
 func (self *Cluster) Remove(ip string, port uint16) {
 	for k := range self.nodes {
-		if self.nodes[k].ip != ip && self.nodes[k].port != port {
-			continue
+		if self.nodes[k].ip == ip && self.nodes[k].port == port {
+			self.calcAllGCD(self.total)
+			self.total--
+			self.calcMaxWeight(self.nodes[k].weight)
+			self.nodes = append(self.nodes[:k], self.nodes[k+1:]...)
+			return
 		}
-		self.calcAllGCD(self.total)
-		self.total--
-		self.calcMaxWeight(self.nodes[k].weight)
-		self.nodes = append(self.nodes[:k], self.nodes[k+1:]...)
-		break
 	}
 }
 
