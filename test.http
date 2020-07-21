@@ -44,14 +44,14 @@ PUT http://localhost:20080/nodes/ZGVtbw/MTI3LjAuMC4xOjIwMTgw
 Content-Type: application/x-www-form-urlencoded
 SECRET: 123456
 
-weight=1&ttl=10&meta={"os": "linux"}
+weight=1&ttl=0&meta={"os": "linux"}
 
 ### 更新节点的属性
 PATCH http://localhost:20080/nodes/ZGVtbw/MTI3LjAuMC4xOjIwMTgw/weight,ttl
 Content-Type: application/x-www-form-urlencoded
 SECRET: 123456
 
-weight=1&ttl=10
+weight=1&ttl=0
 
 ### 删除节点
 DELETE http://localhost:20080/nodes/ZGVtbw/MTI3LjAuMC4xOjIwMTgw
