@@ -7,6 +7,9 @@ func SetRouter(engine *tsing.Engine) {
 	// 检查secret
 	router := engine.Group("", checkSecretFromHeader)
 
+	// 用于客户端获取IP地址
+	router.GET("/ip", GetIP)
+
 	// 数据管理
 	var dataHandler Data
 	router.GET("/data/", dataHandler.OutputJSON)
