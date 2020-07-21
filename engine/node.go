@@ -34,9 +34,5 @@ func DelNode(serviceID string, ip string, port uint16) error {
 		return errors.New("服务不存在或不可用")
 	}
 	ci.Remove(ip, port)
-	if ci.Total() == 0 {
-		global.Services.Delete(serviceID)
-		return nil
-	}
 	return nil
 }
