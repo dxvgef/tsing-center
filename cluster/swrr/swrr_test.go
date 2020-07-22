@@ -29,7 +29,6 @@ func TestNext(t *testing.T) {
 			IP:     ip,
 			Port:   port,
 			Weight: weight,
-			TTL:    60,
 		})
 		log.Println(ip, port, weight)
 	}
