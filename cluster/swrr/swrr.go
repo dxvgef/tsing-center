@@ -3,9 +3,9 @@ package swrr
 import (
 	"time"
 
-	"github.com/rs/zerolog/log"
-
 	"local/global"
+
+	"github.com/rs/zerolog/log"
 )
 
 // 平滑加权轮循(与nginx类似)算法的集群
