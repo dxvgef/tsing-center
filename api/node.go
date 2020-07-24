@@ -290,7 +290,6 @@ func (self *Node) Touch(ctx *tsing.Context) error {
 			node      string
 			ip        string
 			port      uint16
-			ttl       uint
 		}
 		port64 uint64
 	)
@@ -335,7 +334,7 @@ func (self *Node) Touch(ctx *tsing.Context) error {
 	}
 
 	// 更新存储引擎中的数据
-	expires := time.Now().Add(time.Duration(req.ttl) * time.Second).Unix()
+	expires := time.Now().Add(time.Duration(node.TTL) * time.Second).Unix()
 	if err = global.Storage.SaveNode(req.serviceID, global.Node{
 		IP:      node.IP,
 		Port:    node.Port,
