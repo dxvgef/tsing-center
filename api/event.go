@@ -11,7 +11,7 @@ import (
 )
 
 // 事件处理器
-func EventHandler(event *tsing.Event) {
+func EventHandler(event tsing.Event) {
 	event.ResponseWriter.WriteHeader(event.Status)
 
 	switch event.Status {

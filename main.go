@@ -85,7 +85,7 @@ func main() {
 		if err == nil {
 			apiEngineConfig.RootPath = rootPath
 		}
-		apiEngine := tsing.New(&apiEngineConfig)
+		apiEngine := tsing.New(apiEngineConfig)
 		// 设置路由
 		api.SetRouter(apiEngine)
 		// 启动api http服务
