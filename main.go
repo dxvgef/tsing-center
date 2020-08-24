@@ -31,7 +31,7 @@ func main() {
 	setDefaultLogger()
 
 	// --------------------- 加载配置文件 ----------------------
-	flag.StringVar(&configFile, "c", "./config.yml", "配置文件路径")
+	flag.StringVar(&configFile, "c", "./config.toml", "配置文件路径")
 	flag.Parse()
 	err = global.LoadConfigFile(configFile)
 	if err != nil {
@@ -129,7 +129,7 @@ func main() {
 					}
 				}
 				log.Info().Bool("HTTP2", global.Config.API.HTTPS.HTTP2).Str("addr", apiHttpsServer.Addr).Msg("API HTTPS服务")
-				if err = apiHttpsServer.ListenAndServeTLS(global.Config.API.HTTPS.CertFile, global.Config.API.HTTPS.KeyFile); err != nil {
+				if err = apiHttpsServer.ListenAndServeTLS(global.Config.API.HTTPS.Cert, global.Config.API.HTTPS.Key); err != nil {
 					if err == http.ErrServerClosed {
 						log.Info().Msg("API HTTPS服务已关闭")
 						return
