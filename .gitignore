@@ -14,3 +14,4 @@ config.local.toml
 temp_test.go
 __debug_bin
 *.log
+test.http
