@@ -94,10 +94,10 @@ func main() {
 				apiHttpServer = &http.Server{
 					Addr:              global.Config.API.IP + ":" + strconv.FormatUint(uint64(global.Config.API.HTTP.Port), 10),
 					Handler:           apiEngine,
-					ReadTimeout:       global.Config.API.ReadTimeout * time.Second,
-					WriteTimeout:      global.Config.API.WriteTimeout * time.Second,
-					IdleTimeout:       global.Config.API.IdleTimeout * time.Second,
-					ReadHeaderTimeout: global.Config.API.ReadHeaderTimeout * time.Second,
+					ReadTimeout:       global.Config.API.ReadTimeout,
+					WriteTimeout:      global.Config.API.WriteTimeout,
+					IdleTimeout:       global.Config.API.IdleTimeout,
+					ReadHeaderTimeout: global.Config.API.ReadHeaderTimeout,
 				}
 				log.Info().Str("addr", apiHttpServer.Addr).Msg("API HTTP服务")
 				if err = apiHttpServer.ListenAndServe(); err != nil {
@@ -117,10 +117,10 @@ func main() {
 				apiHttpsServer = &http.Server{
 					Addr:              global.Config.API.IP + ":" + strconv.FormatUint(uint64(global.Config.API.HTTPS.Port), 10),
 					Handler:           apiEngine,
-					ReadTimeout:       global.Config.API.ReadTimeout * time.Second,
-					WriteTimeout:      global.Config.API.WriteTimeout * time.Second,
-					IdleTimeout:       global.Config.API.IdleTimeout * time.Second,
-					ReadHeaderTimeout: global.Config.API.ReadHeaderTimeout * time.Second,
+					ReadTimeout:       global.Config.API.ReadTimeout,
+					WriteTimeout:      global.Config.API.WriteTimeout,
+					IdleTimeout:       global.Config.API.IdleTimeout,
+					ReadHeaderTimeout: global.Config.API.ReadHeaderTimeout,
 				}
 				if global.Config.API.HTTPS.HTTP2 {
 					if err = http2.ConfigureServer(apiHttpsServer, &http2.Server{}); err != nil {

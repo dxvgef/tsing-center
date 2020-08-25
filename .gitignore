@@ -10,7 +10,7 @@ go.sum
 *.pem
 *.cert
 *.bak
-config.local.yml
+config.local.toml
 temp_test.go
 __debug_bin
 *.log
